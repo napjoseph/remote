@@ -89,6 +89,8 @@ config_hostname() {
 
   hostnamectl set-hostname $HOSTNAME
   ret=$?
+  sed -i 's/127.0.0.1	localhost/127.0.0.1	localhost $HOSTNAME/' /etc/hosts
+  ret=$((ret+$?))
 
   return $ret
 }
@@ -100,14 +102,17 @@ debian_upgrade () {
 }
 
 install_keybase() {
-  curl --remote-name https://prerelease.keybase.io/keybase_amd64.deb
-  apt install ./keybase_amd64.deb
+  wget https://prerelease.keybase.io/keybase_amd64.deb -O /tmp/keybase_amd64.deb
+  apt install /tmp/keybase_amd64.deb
 }
 
 install_golang() {
   wget https://golang.org/dl/$GOLANG_VERSION.tar.gz -O /tmp/$GOLANG_VERSION.tar.gz
   tar -C /usr/local -xzf /tmp/$GOLANG_VERSION.tar.gz
   rm /tmp/$GOLANG_VERSION.tar.gz
+
+  echo "export PATH=$PATH:/usr/local/go/bin" >> /home/$USERNAME/.profile
+  echo "export GOPATH=/home/$USERNAME/.go" >> /home/$USERNAME/.profile
 }
 
 log "config_hostname" \
