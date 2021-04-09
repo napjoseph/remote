@@ -1,20 +1,25 @@
 #!/bin/bash
 
-# <UDF name="username" label="The username of the default non-root user." default="user" example="user" />
+set -eu
+
+# <UDF name="username" label="The username of the default non-root user." default="" example="user" />
 # <UDF name="password" label="The password of the default non-root user." default="" example="password" />
 
 # Updates the packages on the system from the distribution repositories.
 apt-get update
-apt-get upgrade -y
+apt-get -y upgrade
 
 # Installs the essential applications.
-apt install build-essential git tree --yes
+apt-get -y install build-essential git tree
 
-# Creates a password-less user $USERNAME with sudo access.
+# Creates a password-less user with sudo access.
 adduser --disabled-password --gecos "" ${USERNAME}
 usermod -aG sudo ${USERNAME}
 # Only then will we add a password.
 echo "${USERNAME}:${PASSWORD}" | chpasswd
+# Copy the local public key to the new user's ~/.ssh/authorized_keys.
+cp -r /root/.ssh /home/${USERNAME}/.ssh
+chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.ssh
 
 # TODO: Setup gpg keys
 # TODO: Setup git config
