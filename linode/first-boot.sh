@@ -15,3 +15,7 @@ adduser --disabled-password --gecos "" ${USERNAME}
 usermod -aG sudo ${USERNAME}
 # Only then will we add a password.
 echo "${USERNAME}:${PASSWORD}" | chpasswd
+
+# TODO: Setup gpg keys
+# TODO: Setup git config
+# TODO: Setup docker, go, python, node
