@@ -6,8 +6,8 @@ set -eu
 # <UDF name="USERNAME" label="The username of the default non-root user." default="" example="user" />
 # <UDF name="PASSWORD" label="The password of the default non-root user." default="" example="password" />
 # <UDF name="SSH_PORT" label="Sets the SSH port. This won't be reflected in your Linode Dashboard." default="22" example="22" />
-# <UDF name="LOCK_ROOT_ACCOUNT" label="Lock the root account ?" oneof="yes,no" default="yes" />
-# <UDF name="UPGRADE_DEBIAN" label="Upgrade the system automatically ?" oneof="yes,no" default="yes" />
+# <UDF name="LOCK_ROOT_ACCOUNT" label="Lock the root account?" oneof="yes,no" default="yes" />
+# <UDF name="UPGRADE_DEBIAN" label="Upgrade the system automatically?" oneof="yes,no" default="yes" />
 
 logfile="/var/log/stackscript.log"
 
