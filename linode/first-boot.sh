@@ -7,7 +7,6 @@ set -eu
 # <UDF name="PASSWORD" label="The password of the default non-root user." default="" example="password" />
 # <UDF name="SSH_PORT" label="Sets the SSH port. This won't be reflected in your Linode Dashboard." default="22" example="22" />
 # <UDF name="LOCK_ROOT_ACCOUNT" label="Lock the root account?" oneof="yes,no" default="yes" />
-# <UDF name="DEBIAN_UPDATE" label="Update the system automatically?" oneof="yes,no" default="yes" />
 # <UDF name="DEBIAN_UPGRADE" label="Upgrade the system automatically?" oneof="yes,no" default="yes" />
 # <UDF name="GOLANG_VERSION" label="Version of Go you want to install. Check the list at https://golang.org/dl/." default="go1.16.3.linux-amd64" />
 
