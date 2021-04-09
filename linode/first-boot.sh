@@ -2,8 +2,11 @@
 
 set -eu
 
+# <UDF name="hostname" label="The hostname for the machine." default="localhost" example="localhost" />
 # <UDF name="username" label="The username of the default non-root user." default="" example="user" />
 # <UDF name="password" label="The password of the default non-root user." default="" example="password" />
+
+sudo hostnamectl set-hostname $HOSTNAME
 
 # Updates the packages on the system from the distribution repositories.
 apt-get update
