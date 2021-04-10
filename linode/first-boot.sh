@@ -172,8 +172,8 @@ upgrade_shell_experience() {
 }
 
 log "config_hostname" \
-  "updating hostname to $HOSTNAME: failed." \
-  "updating hostname to $HOSTNAME: successful."
+  "updating hostname: failed." \
+  "updating hostname: successful."
 
 log "create_user" \
   "creating user $USERNAME: failed." \
