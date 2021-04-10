@@ -123,16 +123,13 @@ install_keybase() {
 install_golang() {
   local ret=0
 
-  wget https://golang.org/dl/$GOLANG_VERSION.tar.gz -O /tmp/$GOLANG_VERSION.tar.gz
+  wget https://golang.org/dl/$GOLANG_VERSION.tar.gz -O /tmp/$GOLANG_VERSION.tar.gz && \
+    tar -C /usr/local -xzf /tmp/$GOLANG_VERSION.tar.gz && \
+    rm /tmp/$GOLANG_VERSION.tar.gz
   ret=$?
-  tar -C /usr/local -xzf /tmp/$GOLANG_VERSION.tar.gz
-  ret=$((ret+$?))
-  rm /tmp/$GOLANG_VERSION.tar.gz
-  ret=$((ret+$?))
 
-  echo "export PATH=$PATH:/usr/local/go/bin" >> /home/$USERNAME/.profile
-  ret=$((ret+$?))
-  echo "export GOPATH=/home/$USERNAME/.go" >> /home/$USERNAME/.profile
+  echo "export PATH=$PATH:/usr/local/go/bin" >> /home/$USERNAME/.profile && \
+    echo "export GOPATH=/home/$USERNAME/.go" >> /home/$USERNAME/.profile
   ret=$((ret+$?))
   
   return $ret
@@ -142,33 +139,33 @@ upgrade_shell_experience() {
   local ret=0
   
   # install zsh
-  apt-get -y install zsh
-  ret=$?
-  chsh -s /usr/bin/zsh ${USERNAME}
-  ret=$((ret+$?))
-  touch /home/${USERNAME}/.zshrc
+  apt-get -y install zsh && \
+    chsh -s /usr/bin/zsh ${USERNAME} && \
+    touch /home/${USERNAME}/.zshrc
   ret=$((ret+$?))
   
   # install oh-my-zsh
-  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
   ret=$((ret+$?))
   
   # install oh-my-zsh autocomplete
-  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-/home/$USERNAME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-  ret=$((ret+$?))
-  sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /home/$USERNAME/.zshrc
+  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-/home/$USERNAME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions && \
+    sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /home/$USERNAME/.zshrc
   ret=$((ret+$?))
   
   # install byobu
-  apt-get -y install byobu
+  apt-get -y install byobu && \
+    mkdir -p /home/$USERNAME/.byobu && \
+    echo "_byobu_sourced=1 . /usr/local/bin/byobu-launch 2>/dev/null || true" >> /home/$USERNAME/.zprofile && \
+    echo "set -g default-shell /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf && \
+    echo "set -g default-command /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf
   ret=$((ret+$?))
-  echo "_byobu_sourced=1 . /usr/local/bin/byobu-launch 2>/dev/null || true" >> /home/$USERNAME/.zprofile
-  ret=$((ret+$?))
-  mkdir -p /home/$USERNAME/.byobu
-  ret=$((ret+$?))
-  echo "set -g default-shell /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf
-  ret=$((ret+$?))
-  echo "set -g default-command /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf
+  
+  # change ownership of files and directories
+  chown -R $USERNAME:$USERNAME /home/$USERNAME/.byobu && \
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.oh-my-zsh && \
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.zprofile && \
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.zshrc
   ret=$((ret+$?))
   
   return $ret
