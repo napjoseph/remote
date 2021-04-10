@@ -155,9 +155,7 @@ if [[ ! -d $ZSH_CACHE_DIR ]]; then
 fi
 
 source $ZSH/oh-my-zsh.sh
-' >> /usr/share/oh-my-zsh/zshrc && \
-    ln /usr/share/oh-my-zsh/zshrc /etc/skel/.zshrc && \
-    sed -i 's/DSHELL=\/bin\/bash/DSHELL=\/bin\/zsh/g' /etc/adduser.conf
+' >> /usr/share/oh-my-zsh/zshrc
   ret=$((ret+$?))
   
   # install powerlevel10k theme
@@ -168,6 +166,10 @@ source $ZSH/oh-my-zsh.sh
   # install oh-my-zsh autocomplete
   git clone https://github.com/zsh-users/zsh-autosuggestions /usr/share/oh-my-zsh/custom/plugins/zsh-autosuggestions && \
     sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /usr/share/oh-my-zsh/zshrc
+  ret=$((ret+$?))
+  
+  ln /usr/share/oh-my-zsh/zshrc /etc/skel/.zshrc && \
+    sed -i 's/DSHELL=\/bin\/bash/DSHELL=\/bin\/zsh/g' /etc/adduser.conf
   ret=$((ret+$?))
   
   return $ret
