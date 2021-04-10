@@ -184,6 +184,36 @@ source $ZSH/oh-my-zsh.sh
   return $ret
 }
 
+install_docker() {
+  local ret=0
+  
+  apt-get update && \
+    apt-get install \
+      apt-transport-https \
+      ca-certificates \
+      curl \
+      gnupg \
+      lsb-release
+  ret=$((ret+$?))
+  
+  curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  ret=$((ret+$?))
+  
+  echo \
+    "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
+    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  ret=$((ret+$?))
+  
+  apt-get update && \
+    apt-get install \
+      docker-ce \
+      docker-ce-cli \
+      containerd.io
+  ret=$((ret+$?))
+  
+  return $ret
+}
+
 log "config_timezone" \
   "updating timezone: failed." \
   "updating timezone: successful."
@@ -235,6 +265,10 @@ log "install_keybase" \
 log "install_golang" \
   "installing golang: failed." \
   "installing golang: successful."
+
+log "install_docker" \
+  "installing docker: failed." \
+  "installing docker: successful."
 
 # TODO: Setup git config
 # TODO: Setup docker, python, node
