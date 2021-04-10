@@ -140,36 +140,37 @@ upgrade_shell_experience() {
   local ret=0
   
   # use zsh for non-root user by default
-  touch /home/${USERNAME}/.zshrc
+  touch /home/${USERNAME}/.zshrc && \
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.zshrc && \
+    touch /home/${USERNAME}/.zprofile && \
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.zprofile && \
+    chsh -s /usr/bin/zsh ${USERNAME}
   ret=$((ret+$?))
   
   # install oh-my-zsh
-  runuser -l $USERNAME -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
+  runuser -l $USERNAME -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended' && \
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.oh-my-zsh
   ret=$((ret+$?))
   
+  ZSH_CUSTOM=/home/$USERNAME/.oh-my-zsh/custom
+  
   # install powerlevel10k theme
-  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-/home/$USERNAME/.oh-my-zsh/custom}/themes/powerlevel10k && \
+  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k && \
     sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/g' /home/$USERNAME/.zshrc
   ret=$((ret+$?))
   
   # install oh-my-zsh autocomplete
-  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-/home/$USERNAME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions && \
+  git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions && \
     sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /home/$USERNAME/.zshrc
   ret=$((ret+$?))
   
   # install byobu
   apt-get -y install byobu && \
     mkdir -p /home/$USERNAME/.byobu && \
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.byobu && \
     echo "_byobu_sourced=1 . /usr/local/bin/byobu-launch 2>/dev/null || true" >> /home/$USERNAME/.zprofile && \
     echo "set -g default-shell /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf && \
     echo "set -g default-command /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf
-  ret=$((ret+$?))
-  
-  # change ownership of files and directories
-  chown -R $USERNAME:$USERNAME /home/$USERNAME/.byobu && \
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.oh-my-zsh && \
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.zprofile && \
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.zshrc
   ret=$((ret+$?))
   
   return $ret
