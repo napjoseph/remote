@@ -10,7 +10,7 @@ set -eu
 # <UDF name="LOCK_ROOT_ACCOUNT" label="Lock the root account?" oneof="yes,no" default="yes" />
 # <UDF name="DEBIAN_UPGRADE" label="Upgrade the system automatically?" oneof="yes,no" default="yes" />
 # <UDF name="GOLANG_VERSION" label="Version of Go you want to install. Check the list at https://golang.org/dl/." default="go1.16.3.linux-amd64" />
-# <UDF name="UPDATE_SHELL_EXPERIENCE" label="Install zsh, oh-my-zsh, and byobu?" oneof="yes,no" default="yes" />
+# <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Install zsh, oh-my-zsh, and byobu?" oneof="yes,no" default="yes" />
 
 logfile="/var/log/stackscript.log"
 
@@ -138,7 +138,7 @@ install_golang() {
   return $ret
 }
 
-update_shell_experience() {
+upgrade_shell_experience() {
   local ret=0
   
   # install zsh
@@ -163,6 +163,8 @@ update_shell_experience() {
   apt-get -y install byobu
   ret=$((ret+$?))
   echo "_byobu_sourced=1 . /usr/local/bin/byobu-launch 2>/dev/null || true" >> /home/$USERNAME/.zprofile
+  ret=$((ret+$?))
+  mkdir -p /home/$USERNAME/.byobu
   ret=$((ret+$?))
   echo "set -g default-shell /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf
   ret=$((ret+$?))
@@ -214,9 +216,11 @@ log "install_golang" \
   "installing golang: failed." \
   "installing golang: successful."
 
-log "update_shell_experience" \
-  "updating shell experience: failed." \
-  "updating shell experience: successful."
+[ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ] && {
+  log "upgrade_shell_experience" \
+    "upgrading shell experience: failed." \
+    "upgrading shell experience: successful."
+}
 
 # TODO: Setup git config
 # TODO: Setup docker, python, node
