@@ -2,13 +2,15 @@
 
 set -eu
 
+export DEBIAN_FRONTEND="noninteractive"
+
 # <UDF name="HOSTNAME" label="The hostname for the machine." default="localhost" example="localhost" />
 # <UDF name="HOSTNAME_APPEND_LINODE_ID" label="Append the Linode ID to the hostname?" oneof="yes,no" default="yes" />
 # <UDF name="USERNAME" label="The username of the default non-root user." default="" example="user" />
 # <UDF name="PASSWORD" label="The password of the default non-root user." default="" example="password" />
 # <UDF name="SSH_PORT" label="Sets the SSH port. This won't be reflected in your Linode Dashboard." default="22" example="22" />
 # <UDF name="LOCK_ROOT_ACCOUNT" label="Lock the root account?" oneof="yes,no" default="yes" />
-# <UDF name="DEBIAN_UPGRADE" label="Upgrade the system automatically?" oneof="yes,no" default="yes" />
+# <UDF name="UPGRADE_DEBIAN" label="Upgrade the system automatically?" oneof="yes,no" default="yes" />
 # <UDF name="GOLANG_VERSION" label="Version of Go you want to install. Check the list at https://golang.org/dl/." default="go1.16.3.linux-amd64" />
 # <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Upgrade shell experience? Uses zsh by default and installs oh-my-zsh and byobu." oneof="yes,no" default="yes" />
 
@@ -101,10 +103,9 @@ config_hostname() {
   return $ret
 }
 
-debian_upgrade () {
-  export DEBIAN_FRONTEND="noninteractive"
-  >/dev/null 2>&1 apt update -qq && \
-    >/dev/null 2>&1 apt upgrade -qqy
+upgrade_debian () {
+  apt update -y && \
+    apt upgrade -y
 }
 
 install_keybase() {
@@ -188,8 +189,8 @@ log "config_ssh" \
     "locking root account: successful."
 }
 
-[ "$DEBIAN_UPGRADE" = "yes" ] && {
-  log "debian_upgrade" \
+[ "$UPGRADE_DEBIAN" = "yes" ] && {
+  log "upgrade_debian" \
     "upgrading system: failed." \
     "upgrading system: successful."
 }
@@ -220,3 +221,6 @@ log "install_golang" \
 
 # TODO: Setup git config
 # TODO: Setup docker, python, node
+
+# Initiate a restart after 10 seconds.
+(sleep 10; shutdown -r -t 0) & 
