@@ -140,7 +140,8 @@ upgrade_shell_experience() {
   local ret=0
   
   # use zsh for non-root user by default
-  touch /home/${USERNAME}/.zshrc && \
+  runuser -l $USERNAME -c 'apt-get -y install zsh' && \
+    touch /home/${USERNAME}/.zshrc && \
     chown -R $USERNAME:$USERNAME /home/$USERNAME/.zshrc && \
     touch /home/${USERNAME}/.zprofile && \
     chown -R $USERNAME:$USERNAME /home/$USERNAME/.zprofile && \
@@ -167,12 +168,15 @@ upgrade_shell_experience() {
   ret=$((ret+$?))
   
   # install byobu
-  apt-get -y install byobu && \
+  runuser -l $USERNAME -c 'apt-get -y install byobu' && \
     mkdir -p /home/$USERNAME/.byobu && \
     chown -R $USERNAME:$USERNAME /home/$USERNAME/.byobu && \
     echo "_byobu_sourced=1 . /usr/local/bin/byobu-launch 2>/dev/null || true" >> /home/$USERNAME/.zprofile && \
     echo "set -g default-shell /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf && \
     echo "set -g default-command /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf
+  ret=$((ret+$?))
+  
+  chsh -s /usr/bin/zsh ${USERNAME}
   ret=$((ret+$?))
   
   return $ret
@@ -208,7 +212,7 @@ log "apt-get update" \
   "updating distribution repositories: successful."
 
 # Installs the essential applications.
-log "apt-get -y install build-essential git zsh tree" \
+log "apt-get -y install build-essential git tree" \
   "installing applications: failed." \
   "installing applications: successful."
 
