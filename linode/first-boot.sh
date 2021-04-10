@@ -44,7 +44,7 @@ create_user() {
   [ -z "$PASSWORD" ] && \
     PASSWORD=$(awk -F: '$1 ~ /^root$/ { print $2 }' /etc/shadow) || \
     PASSWORD=$(openssl passwd -6 $PASSWORD)
-  ret=$?
+  ret=$((ret+$?))
   
   useradd -mG sudo \
     -s /bin/bash \
@@ -70,7 +70,7 @@ config_ssh() {
       cp -r /root/.ssh /home/$USERNAME && \
         chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh && \
         chmod 700 /home/$USERNAME/.ssh
-      ret=$?
+      ret=$((ret+$?))
     else
       sedopts="$sedopts -e 's/.*(PermitRootLogin) .+/\1 yes/'"
     fi
