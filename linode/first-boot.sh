@@ -156,11 +156,13 @@ upgrade_shell_experience() {
   
   # install powerlevel10k theme
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k && \
+    chown -R $USERNAME:$USERNAME $ZSH_CUSTOM/themes/powerlevel10k && \
     sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/g' /home/$USERNAME/.zshrc
   ret=$((ret+$?))
   
   # install oh-my-zsh autocomplete
   git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions && \
+    chown -R $USERNAME:$USERNAME $ZSH_CUSTOM/plugins/zsh-autosuggestions && \
     sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /home/$USERNAME/.zshrc
   ret=$((ret+$?))
   
