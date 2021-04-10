@@ -140,7 +140,7 @@ upgrade_shell_experience() {
   local ret=0
   
   # use zsh for non-root user by default
-  usermod -s $(which zsh) $USERNAME && \
+  chsh -s /usr/bin/zsh ${USERNAME} && \
     touch /home/${USERNAME}/.zshrc
   ret=$((ret+$?))
   
@@ -221,6 +221,3 @@ log "install_golang" \
 
 # TODO: Setup git config
 # TODO: Setup docker, python, node
-
-# Initiate a restart after 10 seconds.
-(sleep 10; shutdown -r -t 0) & 
