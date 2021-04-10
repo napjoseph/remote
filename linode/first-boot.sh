@@ -3,6 +3,7 @@
 set -eu
 
 # <UDF name="HOSTNAME" label="The hostname for the machine." default="localhost" example="localhost" />
+# <UDF name="HOSTNAME_APPEND_LINODE_ID" label="Append the Linode ID to the hostname?" oneof="yes,no" default="yes" />
 # <UDF name="USERNAME" label="The username of the default non-root user." default="" example="user" />
 # <UDF name="PASSWORD" label="The password of the default non-root user." default="" example="password" />
 # <UDF name="SSH_PORT" label="Sets the SSH port. This won't be reflected in your Linode Dashboard." default="22" example="22" />
@@ -86,6 +87,10 @@ config_ssh() {
 
 config_hostname() {
   local ret=0
+  
+  if [ "$HOSTNAME_APPEND_LINODE_ID" = "yes" ]; then
+    HOSTNAME="$HOSTNAME-$LINODE_ID"
+  fi
 
   hostnamectl set-hostname $HOSTNAME
   ret=$?
@@ -107,6 +112,8 @@ install_keybase() {
   wget https://prerelease.keybase.io/keybase_amd64.deb -O /tmp/keybase_amd64.deb
   ret=$?
   apt -y install /tmp/keybase_amd64.deb
+  ret=$((ret+$?))
+  rm /tmp/keybase_amd64.deb
   ret=$((ret+$?))
 
   return $ret
