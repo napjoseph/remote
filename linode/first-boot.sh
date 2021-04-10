@@ -146,7 +146,7 @@ upgrade_shell_experience() {
     mkdir -p /etc/skel/.oh-my-zsh/cache && \
     sed -i 's/export ZSH=$HOME\/.oh-my-zsh/export ZSH=\/usr\/share\/oh-my-zsh/g' /usr/share/oh-my-zsh/zshrc  && \
     sed -i 's/# DISABLE_AUTO_UPDATE="true"/DISABLE_AUTO_UPDATE="true"/g' /usr/share/oh-my-zsh/zshrc  && \
-    sed -i 's/source $ZSH\/oh-my-zsh.sh//g' && \
+    sed -i 's/source $ZSH\/oh-my-zsh.sh//g' /usr/share/oh-my-zsh/zshrc && \
     echo '\n \
 \n \
 ZSH_CACHE_DIR=$HOME/.cache/oh-my-zsh \n \
