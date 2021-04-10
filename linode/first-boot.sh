@@ -10,7 +10,7 @@ set -eu
 # <UDF name="LOCK_ROOT_ACCOUNT" label="Lock the root account?" oneof="yes,no" default="yes" />
 # <UDF name="DEBIAN_UPGRADE" label="Upgrade the system automatically?" oneof="yes,no" default="yes" />
 # <UDF name="GOLANG_VERSION" label="Version of Go you want to install. Check the list at https://golang.org/dl/." default="go1.16.3.linux-amd64" />
-# <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Install zsh, oh-my-zsh, and byobu?" oneof="yes,no" default="yes" />
+# <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Upgrade shell experience? Uses zsh by default and installs oh-my-zsh and byobu." oneof="yes,no" default="yes" />
 
 logfile="/var/log/stackscript.log"
 
@@ -138,14 +138,13 @@ install_golang() {
 upgrade_shell_experience() {
   local ret=0
   
-  # install zsh
-  apt-get -y install zsh && \
-    chsh -s /usr/bin/zsh ${USERNAME} && \
+  # use zsh for non-root user by default
+  usermod -s $(which zsh) $USERNAME && \
     touch /home/${USERNAME}/.zshrc
   ret=$((ret+$?))
   
   # install oh-my-zsh
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  runuser -l $USERNAME -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
   ret=$((ret+$?))
   
   # install oh-my-zsh autocomplete
@@ -201,7 +200,7 @@ log "apt-get update" \
   "updating distribution repositories: successful."
 
 # Installs the essential applications.
-log "apt-get -y install build-essential git tree" \
+log "apt-get -y install build-essential git zsh tree" \
   "installing applications: failed." \
   "installing applications: successful."
 
