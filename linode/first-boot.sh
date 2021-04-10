@@ -10,6 +10,7 @@ set -eu
 # <UDF name="LOCK_ROOT_ACCOUNT" label="Lock the root account?" oneof="yes,no" default="yes" />
 # <UDF name="DEBIAN_UPGRADE" label="Upgrade the system automatically?" oneof="yes,no" default="yes" />
 # <UDF name="GOLANG_VERSION" label="Version of Go you want to install. Check the list at https://golang.org/dl/." default="go1.16.3.linux-amd64" />
+# <UDF name="UPDATE_SHELL_EXPERIENCE" label="Install zsh, oh-my-zsh, and byobu?" oneof="yes,no" default="yes" />
 
 logfile="/var/log/stackscript.log"
 
@@ -137,6 +138,40 @@ install_golang() {
   return $ret
 }
 
+update_shell_experience() {
+  local ret=0
+  
+  # install zsh
+  apt-get -y install zsh
+  ret=$?
+  chsh -s /usr/bin/zsh ${USERNAME}
+  ret=$((ret+$?))
+  touch /home/${USERNAME}/.zshrc
+  ret=$((ret+$?))
+  
+  # install oh-my-zsh
+  sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  ret=$((ret+$?))
+  
+  # install oh-my-zsh autocomplete
+  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-/home/$USERNAME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+  ret=$((ret+$?))
+  sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /home/$USERNAME/.zshrc
+  ret=$((ret+$?))
+  
+  # install byobu
+  apt-get -y install byobu
+  ret=$((ret+$?))
+  echo "_byobu_sourced=1 . /usr/local/bin/byobu-launch 2>/dev/null || true" >> /home/$USERNAME/.zprofile
+  ret=$((ret+$?))
+  echo "set -g default-shell /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf
+  ret=$((ret+$?))
+  echo "set -g default-command /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf
+  ret=$((ret+$?))
+  
+  return $ret
+}
+
 log "config_hostname" \
   "updating hostname to $HOSTNAME: failed." \
   "updating hostname to $HOSTNAME: successful."
@@ -178,6 +213,10 @@ log "install_keybase" \
 log "install_golang" \
   "installing golang: failed." \
   "installing golang: successful."
+
+log "update_shell_experience" \
+  "updating shell experience: failed." \
+  "updating shell experience: successful."
 
 # TODO: Setup git config
 # TODO: Setup docker, python, node
