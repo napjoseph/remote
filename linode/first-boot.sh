@@ -150,9 +150,7 @@ upgrade_shell_experience() {
   
   # install powerlevel10k theme
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-/home/$USERNAME/.oh-my-zsh/custom}/themes/powerlevel10k && \
-    sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/g' /home/$USERNAME/.zshrc && \
-    echo "# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh." >> /home/$USERNAME/.zshrc && \
-    echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> /home/$USERNAME/.zshrc
+    sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/g' /home/$USERNAME/.zshrc
   
   # install oh-my-zsh autocomplete
   git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-/home/$USERNAME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions && \
