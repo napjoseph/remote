@@ -12,7 +12,7 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="LOCK_ROOT_ACCOUNT" label="Lock the root account?" oneof="yes,no" default="yes" />
 # <UDF name="UPGRADE_DEBIAN" label="Upgrade the system automatically?" oneof="yes,no" default="yes" />
 # <UDF name="GOLANG_VERSION" label="Version of Go you want to install. Check the list at https://golang.org/dl/." default="go1.16.3.linux-amd64" />
-# <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Upgrade shell experience? Uses zsh by default and installs oh-my-zsh and byobu." oneof="yes,no" default="yes" />
+# <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Upgrade shell experience? Uses zsh and oh-my-zsh." oneof="yes,no" default="yes" />
 
 logfile="/var/log/stackscript.log"
 
@@ -139,44 +139,35 @@ install_golang() {
 upgrade_shell_experience() {
   local ret=0
   
-  # use zsh for non-root user by default
-  runuser -l $USERNAME -c 'apt-get -y install zsh' && \
-    touch /home/${USERNAME}/.zshrc && \
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.zshrc && \
-    touch /home/${USERNAME}/.zprofile && \
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.zprofile && \
-    chsh -s /usr/bin/zsh ${USERNAME}
-  ret=$((ret+$?))
-  
   # install oh-my-zsh
-  runuser -l $USERNAME -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended' && \
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.oh-my-zsh
+  # modified from https://stackoverflow.com/questions/31624649/how-can-i-get-a-secure-system-wide-oh-my-zsh-configuration/61917655#61917655
+  git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git /usr/share/oh-my-zsh && \
+    cp /usr/share/oh-my-zsh/templates/zshrc.zsh-template /usr/share/oh-my-zsh/zshrc && \
+    mkdir -p /etc/skel/.oh-my-zsh/cache && \
+    sed -i 's/export ZSH=$HOME\/.oh-my-zsh/export ZSH=\/usr\/share\/oh-my-zsh/g' /usr/share/oh-my-zsh/zshrc  && \
+    sed -i 's/# DISABLE_AUTO_UPDATE="true"/DISABLE_AUTO_UPDATE="true"/g' /usr/share/oh-my-zsh/zshrc  && \
+    sed -i 's/source $ZSH\/oh-my-zsh.sh//g' && \
+    echo '\n \
+\n \
+ZSH_CACHE_DIR=$HOME/.cache/oh-my-zsh \n \
+if [[ ! -d $ZSH_CACHE_DIR ]]; then \n \
+  mkdir -p $ZSH_CACHE_DIR \n \
+fi \n \
+ \n \
+source $ZSH/oh-my-zsh.sh \n \
+' >> /usr/share/oh-my-zsh/zshrc && \
+    ln /usr/share/oh-my-zsh/zshrc /etc/skel/.zshrc && \
+    sed -i 's/DSHELL=\/bin\/bash/DSHELL=\/bin\/zsh/g' /etc/adduser.conf
   ret=$((ret+$?))
-  
-  ZSH_CUSTOM=/home/$USERNAME/.oh-my-zsh/custom
   
   # install powerlevel10k theme
-  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k && \
-    chown -R $USERNAME:$USERNAME $ZSH_CUSTOM/themes/powerlevel10k && \
-    sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/g' /home/$USERNAME/.zshrc
+  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /usr/share/oh-my-zsh/custom/themes/powerlevel10k && \
+    sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/g' /usr/share/oh-my-zsh/zshrc
   ret=$((ret+$?))
   
   # install oh-my-zsh autocomplete
-  git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions && \
-    chown -R $USERNAME:$USERNAME $ZSH_CUSTOM/plugins/zsh-autosuggestions && \
-    sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /home/$USERNAME/.zshrc
-  ret=$((ret+$?))
-  
-  # install byobu
-  runuser -l $USERNAME -c 'apt-get -y install byobu' && \
-    mkdir -p /home/$USERNAME/.byobu && \
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.byobu && \
-    echo "_byobu_sourced=1 . /usr/local/bin/byobu-launch 2>/dev/null || true" >> /home/$USERNAME/.zprofile && \
-    echo "set -g default-shell /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf && \
-    echo "set -g default-command /usr/bin/zsh" >> /home/$USERNAME/.byobu/.tmux.conf
-  ret=$((ret+$?))
-  
-  chsh -s /usr/bin/zsh ${USERNAME}
+  git clone https://github.com/zsh-users/zsh-autosuggestions /usr/share/oh-my-zsh/custom/plugins/zsh-autosuggestions && \
+    sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /usr/share/oh-my-zsh/zshrc
   ret=$((ret+$?))
   
   return $ret
@@ -185,6 +176,28 @@ upgrade_shell_experience() {
 log "config_hostname" \
   "updating hostname: failed." \
   "updating hostname: successful."
+
+[ "$UPGRADE_DEBIAN" = "yes" ] && {
+  log "upgrade_debian" \
+    "upgrading system: failed." \
+    "upgrading system: successful."
+}
+
+# Updates the packages on the system from the distribution repositories.
+log "apt-get update" \
+  "updating distribution repositories: failed." \
+  "updating distribution repositories: successful."
+
+# Installs the essential applications.
+log "apt-get -y install build-essential git tree zsh" \
+  "installing applications: failed." \
+  "installing applications: successful."
+
+[ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ] && {
+  log "upgrade_shell_experience" \
+    "upgrading shell experience: failed." \
+    "upgrading shell experience: successful."
+}
 
 log "create_user" \
   "creating user $USERNAME: failed." \
@@ -200,22 +213,6 @@ log "config_ssh" \
     "locking root account: successful."
 }
 
-[ "$UPGRADE_DEBIAN" = "yes" ] && {
-  log "upgrade_debian" \
-    "upgrading system: failed." \
-    "upgrading system: successful."
-}
-
-# Updates the packages on the system from the distribution repositories.
-log "apt-get update" \
-  "updating distribution repositories: failed." \
-  "updating distribution repositories: successful."
-
-# Installs the essential applications.
-log "apt-get -y install build-essential git tree" \
-  "installing applications: failed." \
-  "installing applications: successful."
-
 log "install_keybase" \
   "installing keybase: failed." \
   "installing keybase: successful."
@@ -223,12 +220,6 @@ log "install_keybase" \
 log "install_golang" \
   "installing golang: failed." \
   "installing golang: successful."
-
-[ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ] && {
-  log "upgrade_shell_experience" \
-    "upgrading shell experience: failed." \
-    "upgrading shell experience: successful."
-}
 
 # TODO: Setup git config
 # TODO: Setup docker, python, node
