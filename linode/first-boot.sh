@@ -148,6 +148,10 @@ upgrade_shell_experience() {
   runuser -l $USERNAME -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
   ret=$((ret+$?))
   
+  # install powerlevel10k theme
+  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-/home/$USERNAME/.oh-my-zsh/custom}/themes/powerlevel10k && \
+    sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\"/g' /home/$USERNAME/.zshrc
+  
   # install oh-my-zsh autocomplete
   git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-/home/$USERNAME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions && \
     sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /home/$USERNAME/.zshrc
