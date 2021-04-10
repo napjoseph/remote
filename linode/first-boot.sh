@@ -147,14 +147,14 @@ upgrade_shell_experience() {
     sed -i 's/export ZSH=$HOME\/.oh-my-zsh/export ZSH=\/usr\/share\/oh-my-zsh/g' /usr/share/oh-my-zsh/zshrc  && \
     sed -i 's/# DISABLE_AUTO_UPDATE="true"/DISABLE_AUTO_UPDATE="true"/g' /usr/share/oh-my-zsh/zshrc  && \
     sed -i 's/source $ZSH\/oh-my-zsh.sh//g' /usr/share/oh-my-zsh/zshrc && \
-    echo '\n \
-\n \
-ZSH_CACHE_DIR=$HOME/.cache/oh-my-zsh \n \
-if [[ ! -d $ZSH_CACHE_DIR ]]; then \n \
-  mkdir -p $ZSH_CACHE_DIR \n \
-fi \n \
- \n \
-source $ZSH/oh-my-zsh.sh \n \
+    echo '
+
+ZSH_CACHE_DIR=$HOME/.cache/oh-my-zsh
+if [[ ! -d $ZSH_CACHE_DIR ]]; then
+  mkdir -p $ZSH_CACHE_DIR
+fi
+
+source $ZSH/oh-my-zsh.sh
 ' >> /usr/share/oh-my-zsh/zshrc && \
     ln /usr/share/oh-my-zsh/zshrc /etc/skel/.zshrc && \
     sed -i 's/DSHELL=\/bin\/bash/DSHELL=\/bin\/zsh/g' /etc/adduser.conf
