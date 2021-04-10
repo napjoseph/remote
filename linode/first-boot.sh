@@ -140,8 +140,7 @@ upgrade_shell_experience() {
   local ret=0
   
   # use zsh for non-root user by default
-  chsh -s /usr/bin/zsh ${USERNAME} && \
-    touch /home/${USERNAME}/.zshrc
+  touch /home/${USERNAME}/.zshrc
   ret=$((ret+$?))
   
   # install oh-my-zsh
@@ -151,6 +150,7 @@ upgrade_shell_experience() {
   # install powerlevel10k theme
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-/home/$USERNAME/.oh-my-zsh/custom}/themes/powerlevel10k && \
     sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/g' /home/$USERNAME/.zshrc
+  ret=$((ret+$?))
   
   # install oh-my-zsh autocomplete
   git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-/home/$USERNAME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions && \
