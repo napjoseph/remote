@@ -13,6 +13,7 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="UPGRADE_DEBIAN" label="Upgrade the system automatically?" oneof="yes,no" default="yes" />
 # <UDF name="GOLANG_VERSION" label="Version of Go you want to install. Check the list at https://golang.org/dl/." default="go1.16.3.linux-amd64" />
 # <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Upgrade shell experience? Uses zsh and oh-my-zsh." oneof="yes,no" default="yes" />
+# <UDF name="SYSTEM_TIMEZONE" label="Choose system timezone." default="Asia/Manila" example="Asia/Manila" />
 
 logfile="/var/log/stackscript.log"
 
@@ -108,6 +109,14 @@ upgrade_debian () {
     apt upgrade -y
 }
 
+config_timezone() {
+  if [ "$SYSTEM_TIMEZONE" = "" ]; then
+    SYSTEM_TIMEZONE="Asia/Manila"
+  fi
+
+  timedatectl set-timezone $SYSTEM_TIMEZONE
+}
+
 install_keybase() {
   local ret=0
 
@@ -174,6 +183,10 @@ source $ZSH/oh-my-zsh.sh
   
   return $ret
 }
+
+log "config_timezone" \
+  "updating timezone: failed." \
+  "updating timezone: successful."
 
 log "config_hostname" \
   "updating hostname: failed." \
