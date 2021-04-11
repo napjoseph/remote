@@ -136,7 +136,7 @@ install_golang() {
   wget https://golang.org/dl/$GOLANG_VERSION.tar.gz -O /tmp/$GOLANG_VERSION.tar.gz && \
     tar -C /usr/local -xzf /tmp/$GOLANG_VERSION.tar.gz && \
     rm /tmp/$GOLANG_VERSION.tar.gz
-  ret=$?
+  ret=$((ret+$?))
 
   echo "export PATH=$PATH:/usr/local/go/bin" >> /home/$USERNAME/.profile && \
     echo "export GOPATH=/home/$USERNAME/.go" >> /home/$USERNAME/.profile
@@ -195,6 +195,26 @@ install_docker() {
   return $ret
 }
 
+update_skel_files() {
+  local ret=0
+  
+  # define the tty for gpg. without this you will get "Inappropriate ioctl for device" errors
+  echo '
+GPG_TTY=$(tty)
+export GPG_TTY
+' >> /etc/skel/.profile
+  ret=$((ret+$?))
+  
+  # use vim as the default editor
+  echo '
+export VISUAL=vim
+export EDITOR="$VISUAL"
+' >> /etc/skel/.profile
+  ret=$((ret+$?))
+  
+  return $ret
+}
+
 log "config_timezone" \
   "updating timezone: failed." \
   "updating timezone: successful."
@@ -225,6 +245,10 @@ log "apt-get -y install build-essential git tree zsh" \
     "upgrading shell experience: successful."
 }
 
+log "update_skel_files" \
+  "updating skel files: failed." \
+  "updating skel files: successful."
+
 log "create_user" \
   "creating user $USERNAME: failed." \
   "creating user $USERNAME: successful."
@@ -251,5 +275,8 @@ log "install_docker" \
   "installing docker: failed." \
   "installing docker: successful."
 
-# TODO: Setup git config
-# TODO: Setup docker, python, node
+# TODO: Setup brew, python, node
+
+# TODO: Setup keychain for ssh-agent convenience
+#   https://stackoverflow.com/a/24902046
+#   https://unix.stackexchange.com/a/90869
