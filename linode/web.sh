@@ -195,6 +195,9 @@ source $ZSH/oh-my-zsh.sh
   ln /usr/share/oh-my-zsh/zshrc /etc/skel/.zshrc
   ret=$((ret+$?))
   
+  # Change the default shell of the non-root user to zsh.
+  sed -i "s/$USERNAME:x:1000:1000::\/home\/$USERNAME:\/bin\/bash/$USERNAME:x:1000:1000::\/home\/$USERNAME:\/bin\/zsh/g" /etc/passwd
+  
   return $ret
 }
 
