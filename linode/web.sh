@@ -52,9 +52,14 @@ create_user() {
     PASSWORD=$(awk -F: '$1 ~ /^root$/ { print $2 }' /etc/shadow) || \
     PASSWORD=$(openssl passwd -6 $PASSWORD)
   ret=$((ret+$?))
-  
+
+  local DEFAULT_SHELL=/bin/bash
+  if [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ]; then
+    DEFAULT_SHELL=$(which zsh)
+  fi
+
   useradd -mG sudo \
-    -s /bin/bash \
+    -s $DEFAULT_SHELL \
     -p $PASSWORD \
     $USERNAME
   ret=$((ret+$?))
@@ -194,9 +199,6 @@ source $ZSH/oh-my-zsh.sh
   # Copy this to the skeleton templates directory.
   ln /usr/share/oh-my-zsh/zshrc /etc/skel/.zshrc
   ret=$((ret+$?))
-  
-  # Change the default shell of the non-root user to zsh.
-  sed -i "s/$USERNAME:x:1000:1000::\/home\/$USERNAME:\/bin\/bash/$USERNAME:x:1000:1000::\/home\/$USERNAME:\/bin\/zsh/g" /etc/passwd
   
   return $ret
 }
