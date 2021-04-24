@@ -14,6 +14,8 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="GOLANG_VERSION" label="Version of Go you want to install. Check the list at https://golang.org/dl/." default="go1.16.3.linux-amd64" />
 # <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Upgrade shell experience? Uses zsh and oh-my-zsh." oneof="yes,no" default="yes" />
 # <UDF name="SYSTEM_TIMEZONE" label="Choose system timezone." default="Asia/Manila" example="Asia/Manila" />
+# <UDF name="SYSTEM_PUBLIC_KEY" label="If you want to copy a specific SSH key identity, put the public key here. Otherwise, leave this blank." example="ssh-ed25519 AAAA...zzzz name@email.com" />
+# <UDF name="SYSTEM_PRIVATE_KEY" label="If you want to copy a specific SSH key identity, put the private key here. Otherwise, leave this blank." example="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY-----" />
 
 logfile="/var/log/stackscript.log"
 
@@ -79,6 +81,12 @@ config_ssh() {
     sedopts="$sedopts -e 's/.*(PasswordAuthentication) .+/\1 no/'"
   else
     sedopts="$sedopts -e 's/.*(PasswordAuthentication) .+/\1 yes/'"
+  fi
+  
+  # When provided, copy the system public and private SSH keys to the newly created user's .ssh directory.
+  if [ "$USERNAME" ] && [ "$SYSTEM_PUBLIC_KEY" ] && [ "$SYSTEM_PRIVATE_KEY" ]; then
+    echo ${SYSTEM_PUBLIC_KEY} >> /home/$USERNAME/.ssh/$HOSTNAME.pub
+    echo ${SYSTEM_PRIVATE_KEY} >> /home/$USERNAME/.ssh/$HOSTNAME
   fi
 
   eval sed $sedopts
