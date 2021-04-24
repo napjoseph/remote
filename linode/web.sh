@@ -198,6 +198,7 @@ source $ZSH/oh-my-zsh.sh
   
   # Change the default shell of the non-root user to zsh.
   chsh -s /usr/bin/zsh ${USERNAME}
+  ret=$((ret+$?))
   
   return $ret
 }
@@ -239,7 +240,7 @@ export EDITOR="$VISUAL"
     ret=$((ret+$?))
 
     # Create a .zlogin file that is sourced in login shells.
-    echo "eval `keychain --agents ssh --eval $HOSTNAME --quiet --nogui --noask --clear`" >>  /etc/skel/.zlogin
+    echo "eval \$(keychain --quiet --nogui --noask --clear --agents ssh --eval $HOSTNAME)" >> /etc/skel/.zlogin
     ret=$((ret+$?))
   fi
   
