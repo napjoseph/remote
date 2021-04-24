@@ -197,7 +197,7 @@ source $ZSH/oh-my-zsh.sh
   ret=$((ret+$?))
   
   # Change the default shell of the non-root user to zsh.
-  runuser -l $USERNAME -c "chsh -s /usr/bin/zsh $USERNAME"
+  sed -i "s/$USERNAME:x:1000:1000::\/home\/$USERNAME:\/bin\/bash/$USERNAME:x:1000:1000::\/home\/$USERNAME:\/bin\/zsh/g" /etc/passwd
   ret=$((ret+$?))
   
   return $ret
