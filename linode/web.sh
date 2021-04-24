@@ -192,12 +192,7 @@ source $ZSH/oh-my-zsh.sh
   ret=$((ret+$?))
   
   # Copy this to the skeleton templates directory.
-  ln /usr/share/oh-my-zsh/zshrc /etc/skel/.zshrc && \
-    sed -i 's/DSHELL=\/bin\/bash/DSHELL=\/bin\/zsh/g' /etc/adduser.conf
-  ret=$((ret+$?))
-  
-  # Change the default shell of the non-root user to zsh.
-  sed -i "s/$USERNAME:x:1000:1000::\/home\/$USERNAME:\/bin\/bash/$USERNAME:x:1000:1000::\/home\/$USERNAME:\/bin\/zsh/g" /etc/passwd
+  ln /usr/share/oh-my-zsh/zshrc /etc/skel/.zshrc
   ret=$((ret+$?))
   
   return $ret
@@ -235,6 +230,9 @@ export EDITOR="$VISUAL"
   ret=$((ret+$?))
   
   if [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ]; then
+    # Use zsh by default.
+    sed -i 's/DSHELL=\/bin\/bash/DSHELL=\/bin\/zsh/g' /etc/adduser.conf
+  
     # Create a .zprofile file that loads the values from .profile.
     echo "[[ -e ~/.profile ]] && emulate sh -c 'source ~/.profile'" >> /etc/skel/.zprofile
     ret=$((ret+$?))
