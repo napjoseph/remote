@@ -17,6 +17,10 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="SYSTEM_PUBLIC_KEY" label="If you want to copy a specific SSH key identity, put the public key here. Otherwise, leave this blank." example="ssh-ed25519 AAAA...zzzz name@email.com" />
 # <UDF name="SYSTEM_PRIVATE_KEY" label="If you want to copy a specific SSH key identity, put the private key here. Otherwise, leave this blank." example="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY-----" />
 
+if [ "$HOSTNAME_APPEND_LINODE_ID" = "yes" ]; then
+  HOSTNAME="$HOSTNAME-$LINODE_ID"
+fi
+
 logfile="/var/log/stackscript.log"
 
 log_error() {
@@ -87,6 +91,12 @@ config_ssh() {
   if [ "$USERNAME" ] && [ "$SYSTEM_PUBLIC_KEY" ] && [ "$SYSTEM_PRIVATE_KEY" ]; then
     echo ${SYSTEM_PUBLIC_KEY} >> /home/$USERNAME/.ssh/$HOSTNAME.pub
     echo ${SYSTEM_PRIVATE_KEY} >> /home/$USERNAME/.ssh/$HOSTNAME
+
+    # Install keychain for ssh-agent convenience:
+    #  https://stackoverflow.com/a/24902046
+    #  https://unix.stackexchange.com/a/90869
+    apt-get -y install keychain
+    ret=$((ret+$?))
   fi
 
   eval sed $sedopts
@@ -99,10 +109,6 @@ config_ssh() {
 
 config_hostname() {
   local ret=0
-  
-  if [ "$HOSTNAME_APPEND_LINODE_ID" = "yes" ]; then
-    HOSTNAME="$HOSTNAME-$LINODE_ID"
-  fi
 
   hostnamectl set-hostname $HOSTNAME
   ret=$?
@@ -284,7 +290,3 @@ log "install_docker" \
   "installing docker: successful."
 
 # TODO: Setup brew, python, node
-
-# TODO: Setup keychain for ssh-agent convenience
-#   https://stackoverflow.com/a/24902046
-#   https://unix.stackexchange.com/a/90869
