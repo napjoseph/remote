@@ -14,8 +14,8 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="GOLANG_VERSION" label="Version of Go you want to install. Check the list at https://golang.org/dl/." default="go1.16.3.linux-amd64" />
 # <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Upgrade shell experience? Uses zsh and oh-my-zsh." oneof="yes,no" default="yes" />
 # <UDF name="SYSTEM_TIMEZONE" label="Choose system timezone." default="Asia/Manila" example="Asia/Manila" />
-# <UDF name="SYSTEM_PUBLIC_KEY" label="If you want to copy a specific SSH key identity, put the public key here. Otherwise, leave this blank." example="ssh-ed25519 AAAA...zzzz name@email.com" />
-# <UDF name="SYSTEM_PRIVATE_KEY" label="If you want to copy a specific SSH key identity, put the private key here. Otherwise, leave this blank." example="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY-----" />
+# <UDF name="SYSTEM_PUBLIC_KEY" label="If you want to copy a specific SSH key identity, put the PUBLIC_KEY here. Otherwise, leave this blank." example="ssh-ed25519 AAAA...zzzz name@email.com" />
+# <UDF name="SYSTEM_PRIVATE_KEY" label="If you want to copy a specific SSH key identity, put the PRIVATE_KEY here. Otherwise, leave this blank." example="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY-----" />
 
 if [ "$HOSTNAME_APPEND_LINODE_ID" = "yes" ]; then
   HOSTNAME="$HOSTNAME-$LINODE_ID"
@@ -197,7 +197,7 @@ source $ZSH/oh-my-zsh.sh
   ret=$((ret+$?))
   
   # Change the default shell of the non-root user to zsh.
-  chsh -s /usr/bin/zsh ${USERNAME}
+  runuser -l $USERNAME -c "chsh -s /usr/bin/zsh $USERNAME"
   ret=$((ret+$?))
   
   return $ret
