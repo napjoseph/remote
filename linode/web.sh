@@ -239,7 +239,7 @@ export EDITOR="$VISUAL"
     ret=$((ret+$?))
 
     # Create a .zlogin file that is sourced in login shells.
-    echo "eval `keychain --agents ssh --eval id_rsa --quiet --nogui --noask --clear`" >>  /etc/skel/.zlogin
+    echo "eval `keychain --agents ssh --eval $HOSTNAME --quiet --nogui --noask --clear`" >>  /etc/skel/.zlogin
     ret=$((ret+$?))
   fi
   
