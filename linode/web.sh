@@ -162,8 +162,8 @@ install_golang() {
 upgrade_shell_experience() {
   local ret=0
   
-  # install oh-my-zsh
-  # modified from https://stackoverflow.com/questions/31624649/how-can-i-get-a-secure-system-wide-oh-my-zsh-configuration/61917655#61917655
+  # Install oh-my-zsh.
+  # Modified from https://stackoverflow.com/questions/31624649/how-can-i-get-a-secure-system-wide-oh-my-zsh-configuration/61917655#61917655
   git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git /usr/share/oh-my-zsh && \
     cp /usr/share/oh-my-zsh/templates/zshrc.zsh-template /usr/share/oh-my-zsh/zshrc && \
     mkdir -p /etc/skel/.oh-my-zsh/cache && \
@@ -181,19 +181,23 @@ source $ZSH/oh-my-zsh.sh
 ' >> /usr/share/oh-my-zsh/zshrc
   ret=$((ret+$?))
   
-  # install powerlevel10k theme
+  # Install the powerlevel10k theme.
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git /usr/share/oh-my-zsh/custom/themes/powerlevel10k && \
     sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/g' /usr/share/oh-my-zsh/zshrc
   ret=$((ret+$?))
   
-  # install oh-my-zsh autocomplete
+  # Install oh-my-zsh autocomplete.
   git clone https://github.com/zsh-users/zsh-autosuggestions /usr/share/oh-my-zsh/custom/plugins/zsh-autosuggestions && \
     sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /usr/share/oh-my-zsh/zshrc
   ret=$((ret+$?))
   
+  # Copy this to the skeleton templates directory.
   ln /usr/share/oh-my-zsh/zshrc /etc/skel/.zshrc && \
     sed -i 's/DSHELL=\/bin\/bash/DSHELL=\/bin\/zsh/g' /etc/adduser.conf
   ret=$((ret+$?))
+  
+  # Change the default shell of the non-root user to zsh.
+  chsh -s /usr/bin/zsh ${USERNAME}
   
   return $ret
 }
@@ -212,19 +216,32 @@ install_docker() {
 update_skel_files() {
   local ret=0
   
-  # define the tty for gpg. without this you will get "Inappropriate ioctl for device" errors
+  # The initialization files used in bash can be (okay, it IS) confusing.
+  # See https://medium.com/@rajsek/zsh-bash-startup-files-loading-order-bashrc-zshrc-etc-e30045652f2e
+  
+  # Define the tty for gpg. Without this you will get "Inappropriate ioctl for device" errors.
   echo '
 GPG_TTY=$(tty)
 export GPG_TTY
 ' >> /etc/skel/.profile
   ret=$((ret+$?))
   
-  # use vim as the default editor
+  # Use vim as the default editor.
   echo '
 export VISUAL=vim
 export EDITOR="$VISUAL"
 ' >> /etc/skel/.profile
   ret=$((ret+$?))
+  
+  if [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ]; then
+    # Create a .zprofile file that loads the values from .profile.
+    echo "[[ -e ~/.profile ]] && emulate sh -c 'source ~/.profile'" >> /etc/skel/.zprofile
+    ret=$((ret+$?))
+
+    # Create a .zlogin file that is sourced in login shells.
+    echo "eval `keychain --agents ssh --eval id_rsa --quiet --nogui --noask --clear`" >>  /etc/skel/.zlogin
+    ret=$((ret+$?))
+  fi
   
   return $ret
 }
