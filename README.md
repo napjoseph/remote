@@ -11,11 +11,15 @@ Helps you create your own remote web development environment.
 - A [Linode account](https://www.linode.com/?r=b042b8d928111627044d292bdbca3691c536bf8d). You can go to their [docs](https://www.linode.com/docs/guides/getting-started/) to get a $100 promo code.
 - [Visual Studio Code](https://code.visualstudio.com/).
 
-## Generate SSH Key
+## Generate SSH Key for your local machine
 
 Follow [GitHub's guide](https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) to generate your SSH key pair. For Windows users, you may need to check this [guide from Microsoft](https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_keymanagement) to enable SSH in your machine.
 
-Afterwards, add the key to your GitHub account.
+Afterwards, add the key to your GitHub and Linode account.
+
+## Generate SSH Key for your new Linode instance
+
+Create a new SSH Key for your new Linode instance. Save this for now as we'll use this later.
 
 ## Generate GPG Key
 
@@ -118,20 +122,4 @@ git config --global user.email "your_name@example.com"
 # sign all commits using your GPG key
 git config --global user.signingkey E870EE00
 git config --global commit.gpgsign true
-```
-
-### (Optional) Generate SSH Key... Again
-
-**NOTE**: If you *really* want to, you can skip this step and just copy your existing key pairs over to `~/.ssh`. However, I usually create a different SSH key for each device (it's free anyways).
-
-Again, follow [GitHub's guide](https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) to generate your SSH key pair. Afterwards, add the key to your GitHub account.
-
-To use, run:
-
-```bash
-# start the ssh-agent in the background
-eval "$(ssh-agent -s)"
-
-# add the private key to the ssh-agent
-ssh-add ~/.ssh/your_key
 ```
