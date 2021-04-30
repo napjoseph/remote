@@ -96,6 +96,9 @@ config_ssh() {
   if [ "$USERNAME" ] && [ "$SYSTEM_PUBLIC_KEY" ] && [ "$SYSTEM_PRIVATE_KEY" ]; then
     echo ${SYSTEM_PUBLIC_KEY} >> /home/$USERNAME/.ssh/$HOSTNAME.pub
     echo ${SYSTEM_PRIVATE_KEY} >> /home/$USERNAME/.ssh/$HOSTNAME
+    
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh/$HOSTNAME.pub
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh/$HOSTNAME
 
     # Install keychain for ssh-agent convenience:
     #  https://stackoverflow.com/a/24902046
@@ -161,6 +164,29 @@ install_golang() {
     echo "export GOPATH=/home/$USERNAME/.go" >> /home/$USERNAME/.profile
   ret=$((ret+$?))
   
+  return $ret
+}
+
+install_nvm() {
+  local ret=0
+  
+  # NOTE: nvm is not meant to be install globally so we will run the command as the non-root user.
+  # If you want that functionality, maybe you can use https://github.com/tj/n.
+  export NVM_DIR="/home/$USERNAME/.nvm" && (
+    git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
+    cd "$NVM_DIR"
+    git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1)`
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.nvm
+  ) && /bin/su -s /bin/bash -c "$NVM_DIR/nvm.sh" $USERNAME
+  
+  echo '
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+' >> /home/$USERNAME/.profile
+  ret=$((ret+$?))
+
   return $ret
 }
 
@@ -306,8 +332,12 @@ log "install_golang" \
   "installing golang: failed." \
   "installing golang: successful."
 
+log "install_nvm" \
+  "installing nvm: failed." \
+  "installing nvm: successful."
+
 log "install_docker" \
   "installing docker: failed." \
   "installing docker: successful."
 
-# TODO: Setup brew, python, node
+# TODO: Setup brew, python
