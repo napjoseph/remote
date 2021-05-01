@@ -86,7 +86,7 @@ config_ssh() {
       sedopts="$sedopts -e 's/.*(PermitRootLogin) .+/\1 no/'"
       cp -r /root/.ssh /home/$USERNAME && \
         chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh && \
-        chmod 700 /home/$USERNAME/.ssh
+        chmod -R 700 /home/$USERNAME/.ssh
       ret=$((ret+$?))
     else
       sedopts="$sedopts -e 's/.*(PermitRootLogin) .+/\1 yes/'"
@@ -102,8 +102,9 @@ config_ssh() {
     echo ${SYSTEM_PUBLIC_KEY} >> /home/$USERNAME/.ssh/$HOSTNAME.pub
     echo ${SYSTEM_PRIVATE_KEY} >> /home/$USERNAME/.ssh/$HOSTNAME
     
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh/$HOSTNAME.pub
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh/$HOSTNAME
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.ssh && \
+      chmod -R 700 /home/$USERNAME/.ssh
+    ret=$((ret+$?))
 
     # Install keychain for ssh-agent convenience:
     #  https://stackoverflow.com/a/24902046
@@ -180,9 +181,10 @@ install_nvm() {
   export NVM_DIR="/home/$USERNAME/.nvm" && (
     git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
     cd "$NVM_DIR"
+    # Checkout the latest versioned release.
     git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1)`
     chown -R $USERNAME:$USERNAME "$NVM_DIR"
-  ) && /bin/su -s /bin/bash -c "$NVM_DIR/nvm.sh" $USERNAME
+  ) && runuser -u $USERNAME -- /bin/bash -c "$NVM_DIR/nvm.sh" 
   
   echo '
 # nvm
@@ -248,13 +250,14 @@ install_docker() {
 install_homebrew() {
   local ret=0
   
-  # Install homebrew on /home/linuxbrew/.linuxbrew.
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  # Installs homebrew on /home/linuxbrew/.linuxbrew.
+  # We are using runuser here since it will error out when su is used.
+  runuser -u $USERNAME -- /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
   ret=$((ret+$?))
   
   echo '
 # brew
-eval \$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 ' >> /home/$USERNAME/.profile
 
   return $ret
