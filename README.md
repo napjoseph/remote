@@ -73,15 +73,19 @@ Congratulations! You can now connect to your remote server instance.
 
 The essentials are already installed in your instance. However, we need to configure a few applications we will use.
 
-### Enable Zsh
+### Configuring your zsh theme
+
+**IMPORTANT**: If you are using Windows, you can use [Windows Terminal](https://microsoft.com/en-us/p/windows-terminal/9n0dx20hk701).
+
+**IMPORTANT**: You also need to install the [recommended fonts](https://github.com/romkatv/powerlevel10k#meslo-nerd-font-patched-for-powerlevel10k) for the theme to display properly.
+
+If you enabled `UPGRADE_SHELL_EXPERIENCE`, [zsh](https://sourceforge.net/p/zsh/code/ci/master/tree/), [oh-my-zsh](https://ohmyz.sh/), and the [powerlevel10k zsh theme](https://github.com/romkatv/powerlevel10k) will be installed.
+
+On your first login via SSH, it will ask you to configure your theme. To run the wizard again, you can run:
 
 ```bash
-zsh
+p10k configure
 ```
-
-This will also let you set up the [powerlevel10k zsh theme](https://github.com/romkatv/powerlevel10k).
-
-**TODO**: Add instructions how to set up your terminal in Windows.
 
 ### Configure Keybase
 
