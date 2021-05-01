@@ -252,6 +252,10 @@ install_homebrew() {
   local ret=0
   
   # Installs homebrew on /home/linuxbrew/.linuxbrew.
+  mkdir -p /home/linuxbrew/.linuxbrew && \
+    chown -R $USERNAME:$USERNAME /home/linuxbrew/.linuxbrew
+  ret=$((ret+$?))
+  
   # We are using runuser here since it will error out when su is used.
   # echo | <command> simulates pressing [ENTER].
   echo | runuser -u $USERNAME -- /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
