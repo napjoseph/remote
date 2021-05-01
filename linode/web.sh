@@ -184,6 +184,7 @@ install_nvm() {
     # Checkout the latest versioned release.
     git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1)`
     chown -R $USERNAME:$USERNAME "$NVM_DIR"
+    chmod +x "$NVM_DIR/nvm.sh"
   ) && runuser -u $USERNAME -- /bin/bash -c "$NVM_DIR/nvm.sh" 
   
   echo '
@@ -252,7 +253,8 @@ install_homebrew() {
   
   # Installs homebrew on /home/linuxbrew/.linuxbrew.
   # We are using runuser here since it will error out when su is used.
-  runuser -u $USERNAME -- /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
+  # echo | <command> simulates pressing [ENTER].
+  echo | runuser -u $USERNAME -- /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   ret=$((ret+$?))
   
   echo '
