@@ -11,8 +11,13 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="SSH_PORT" label="Sets the SSH port. This won't be reflected in your Linode Dashboard." default="22" example="22" />
 # <UDF name="LOCK_ROOT_ACCOUNT" label="Lock the root account?" oneof="yes,no" default="yes" />
 # <UDF name="UPGRADE_DEBIAN" label="Upgrade the system automatically?" oneof="yes,no" default="yes" />
-# <UDF name="GOLANG_VERSION" label="Version of Go you want to install. Check the list at https://golang.org/dl/." default="go1.16.3.linux-amd64" />
-# <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Upgrade shell experience? Uses zsh and oh-my-zsh." oneof="yes,no" default="yes" />
+# <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Upgrade shell experience? Uses zsh, oh-my-zsh, and powerlevel10k." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_KEYBASE" label="Install Keybase? See https://keybase.io/ for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_GOLANG" label="Install the Go Programming Language? See https://golang.org/ for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_NVM" label="Install Node Version Manager? See https://github.com/nvm-sh/nvm for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_DOCKER" label="Install docker? See https://www.docker.com/ for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_HOMEBREW" label="Install homebrew? See https://brew.sh for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_PYENV" label="Install pyenv? See https://github.com/pyenv/pyenv for more details." oneof="yes,no" default="yes" />
 # <UDF name="SYSTEM_TIMEZONE" label="Choose system timezone." default="Asia/Manila" example="Asia/Manila" />
 # <UDF name="SYSTEM_PUBLIC_KEY" label="If you want to copy a specific SSH key identity, put the PUBLIC_KEY here. Otherwise, leave this blank." example="ssh-ed25519 AAAA...zzzz name@email.com" />
 # <UDF name="SYSTEM_PRIVATE_KEY" label="If you want to copy a specific SSH key identity, put the PRIVATE_KEY here. Otherwise, leave this blank." example="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY-----" />
@@ -155,9 +160,9 @@ install_keybase() {
 install_golang() {
   local ret=0
 
-  wget https://golang.org/dl/$GOLANG_VERSION.tar.gz -O /tmp/$GOLANG_VERSION.tar.gz && \
-    tar -C /usr/local -xzf /tmp/$GOLANG_VERSION.tar.gz && \
-    rm /tmp/$GOLANG_VERSION.tar.gz
+  wget "https://golang.org/dl/$(curl https://golang.org/VERSION?m=text).linux-amd64.tar.gz" -O /tmp/golang.tar.gz && \
+    tar -C /usr/local -xzf /tmp/golang.tar.gz && \
+    rm /tmp/golang.tar.gz
   ret=$((ret+$?))
 
   echo "export PATH=$PATH:/usr/local/go/bin" >> /home/$USERNAME/.profile && \
@@ -176,7 +181,7 @@ install_nvm() {
     git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
     cd "$NVM_DIR"
     git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1)`
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.nvm
+    chown -R $USERNAME:$USERNAME "$NVM_DIR"
   ) && /bin/su -s /bin/bash -c "$NVM_DIR/nvm.sh" $USERNAME
   
   echo '
@@ -240,6 +245,46 @@ install_docker() {
   return $ret
 }
 
+install_homebrew() {
+  local ret=0
+  
+  # Install homebrew on /home/linuxbrew/.linuxbrew.
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  ret=$((ret+$?))
+  
+  echo '
+# brew
+eval \$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+' >> /home/$USERNAME/.profile
+
+  return $ret
+}
+
+install_pyenv() {
+  local ret=0
+  
+  # Install pyenv for the non-root user.
+  export PYENV_DIR="/home/$USERNAME/.pyenv" && (
+    git clone --depth 1 https://github.com/pyenv/pyenv.git $PYENV_DIR
+    # Try to compile dynamic bash extension to speed up pyenv.
+    $PYENV_DIR/src/configure && make -C $PYENV_DIR/src
+  ) && chown -R $USERNAME:$USERNAME $PYENV_DIR
+  
+  git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+  ret=$((ret+$?))
+  
+  echo '
+# pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
+' >> /home/$USERNAME/.profile
+
+  return $ret
+}
+
 update_skel_files() {
   local ret=0
   
@@ -296,7 +341,7 @@ log "apt-get update" \
   "updating distribution repositories: successful."
 
 # Installs the essential applications.
-log "apt-get -y install build-essential git tree zsh" \
+log "apt-get -y install build-essential procps curl file git tree zsh" \
   "installing applications: failed." \
   "installing applications: successful."
 
@@ -324,20 +369,38 @@ log "config_ssh" \
     "locking root account: successful."
 }
 
-log "install_keybase" \
-  "installing keybase: failed." \
-  "installing keybase: successful."
+[ "$INSTALL_KEYBASE" = "yes" ] && {
+  log "install_keybase" \
+    "installing keybase: failed." \
+    "installing keybase: successful."
+}
 
-log "install_golang" \
-  "installing golang: failed." \
-  "installing golang: successful."
+[ "$INSTALL_GOLANG" = "yes" ] && {
+  log "install_golang" \
+    "installing golang: failed." \
+    "installing golang: successful."
+}
 
-log "install_nvm" \
-  "installing nvm: failed." \
-  "installing nvm: successful."
+[ "$INSTALL_NVM" = "yes" ] && {
+  log "install_nvm" \
+    "installing nvm: failed." \
+    "installing nvm: successful."
+}
 
-log "install_docker" \
-  "installing docker: failed." \
-  "installing docker: successful."
+[ "$INSTALL_DOCKER" = "yes" ] && {
+  log "install_docker" \
+    "installing docker: failed." \
+    "installing docker: successful."
+}
 
-# TODO: Setup brew, python
+[ "$INSTALL_HOMEBREW" = "yes" ] && {
+  log "install_homebrew" \
+    "installing homebrew: failed." \
+    "installing homebrew: successful."
+}
+
+[ "$INSTALL_PYENV" = "yes" ] && {
+  log "install_pyenv" \
+    "installing pyenv: failed." \
+    "installing pyenv: successful."
+}
