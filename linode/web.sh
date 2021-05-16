@@ -18,6 +18,7 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="INSTALL_DOCKER" label="Install docker? See https://www.docker.com/ for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_HOMEBREW" label="Install homebrew? See https://brew.sh for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_PYENV" label="Install pyenv? See https://github.com/pyenv/pyenv for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_BYOBU" label="Install byobu? See https://byobu.org for more details." oneof="yes,no" default="yes" />
 # <UDF name="SYSTEM_TIMEZONE" label="Choose system timezone." default="Asia/Manila" example="Asia/Manila" />
 # <UDF name="SYSTEM_PUBLIC_KEY" label="If you want to copy a specific SSH key identity, put the PUBLIC_KEY here. Otherwise, leave this blank." example="ssh-ed25519 AAAA...zzzz name@email.com" />
 # <UDF name="SYSTEM_PRIVATE_KEY" label="If you want to copy a specific SSH key identity, put the PRIVATE_KEY here. Otherwise, leave this blank." example="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY-----" />
@@ -294,6 +295,39 @@ fi
   return $ret
 }
 
+install_byobu() {
+  local ret=0
+
+  # Add byobu to the list of shells.
+  which byobu | tee -a /etc/shells
+  ret=$((ret+$?))
+  
+  # Enable byobu on login.
+  runuser -u $USERNAME -- /bin/bash -c byobu-enable
+  ret=$((ret+$?))
+  
+  # Fix the reuse session bug.
+  local BYOBU_DIR="/home/$USERNAME/.byobu"
+  mkdir -p $BYOBU_DIR && \
+    touch $BYOBU_DIR/.reuse-session
+  ret=$((ret+$?))
+  
+  # Set the default shell to use.
+  local DEFAULT_SHELL=/bin/bash
+  if [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ]; then
+    DEFAULT_SHELL=$(which zsh)
+  fi
+  echo "set -g default-shell $DEFAULT_SHELL" >> $BYOBU_DIR/.tmux.conf && \
+    echo "set -g default-command $DEFAULT_SHELL" >> $BYOBU_DIR/.tmux.conf
+  ret=$((ret+$?))
+  
+  # Make sure the non-root user is the owner of the files.
+  chown -R $USERNAME:$USERNAME $BYOBU_DIR
+  ret=$((ret+$?))
+
+  return $ret
+}
+
 update_skel_files() {
   local ret=0
   
@@ -350,7 +384,7 @@ log "apt-get update" \
   "updating distribution repositories: successful."
 
 # Installs the essential applications.
-log "apt-get -y install build-essential procps curl file git tree zsh" \
+log "apt-get -y install build-essential procps curl file git tree zsh byobu" \
   "installing applications: failed." \
   "installing applications: successful."
 
@@ -402,16 +436,21 @@ log "config_ssh" \
     "installing docker: successful."
 }
 
-[ "$INSTALL_HOMEBREW" = "yes" ] && {
-  log "install_homebrew" \
-    "installing homebrew: failed." \
-    "installing homebrew: successful."
-}
-
 [ "$INSTALL_PYENV" = "yes" ] && {
   log "install_pyenv" \
     "installing pyenv: failed." \
     "installing pyenv: successful."
 }
 
-# TODO: Install byobu.
+[ "$INSTALL_BYOBU" = "yes" ] && {
+  log "install_byobu" \
+    "installing byobu: failed." \
+    "installing byobu: successful."
+}
+
+# Moving this at the bottom since it takes too long.
+[ "$INSTALL_HOMEBREW" = "yes" ] && {
+  log "install_homebrew" \
+    "installing homebrew: failed." \
+    "installing homebrew: successful."
+}
