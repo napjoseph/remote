@@ -1,11 +1,22 @@
 # remote
 
-Helps you create your own remote web development environment.
+Helps you create your own remote web development environment using [Linode](https://www.linode.com/?r=b042b8d928111627044d292bdbca3691c536bf8d).
+
+## Installs
+
+- [x] [zsh](https://www.zsh.org/), [oh-my-zsh](https://ohmyz.sh/), and [powerlevel10k](https://github.com/romkatv/powerlevel10k)
+- [x] [Keybase](https://keybase.io)
+- [x] [Go](https://golang.org/)
+- [x] [Node Version Manager](https://github.com/nvm-sh/nvm)
+- [x] [pyenv](https://github.com/pyenv/pyenv)
+- [x] [Docker](https://www.docker.com/)
+- [x] [byobu](https://byobu.org)
+- [x] [Homebrew](https://brew.sh)
 
 ## Pre-requisities
 
-- Bash Shell. For windows, you can use [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701) or [Git Bash](https://git-scm.com/downloads).
-- Your local SSH key pair. See [GitHub's guide](https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
+- A terminal with Bash or something similar. For Windows, you can use [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701) or [Git Bash](https://git-scm.com/downloads). You can check [my current settings for Windows Terminal](./windows/terminal/settings.md).
+- Your local SSH key pair. See [GitHub's guide](https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) for more details.
 - A [GitHub](https://github.com) account.
 - A [Keybase](https://keybase.io/) account for storing your GPG keys.
 - A [Linode account](https://www.linode.com/?r=b042b8d928111627044d292bdbca3691c536bf8d). You can go to their [docs](https://www.linode.com/docs/guides/getting-started/) to get a $100 promo code.
@@ -67,7 +78,25 @@ Then connect via SSH:
 ssh <NON_ROOT_USERNAME>@<LINODE_IPV4_ADDRESS> -p <SSH_PORT>
 ```
 
+Alternatively, you can create a config file to make it easier to connect to your remote host.
+
+```
+# ~/.ssh/config
+
+Host <ALIAS>
+  User <NON_ROOT_USERNAME>
+  HostName <LINODE_IPV4_ADDRESS>
+  Port <SSH_PORT>
+  IdentityFile <PRIVATE_KEY_FILE_LOCATION>
+```
+
+```bash
+ssh <ALIAS>
+```
+
 Congratulations! You can now connect to your remote server instance.
+
+**NOTE**: You can already connect via SSH even if the StackScript has not yet been completed. To check its status, you can check the logs using `cat /var/log/stackscript.log`.
 
 ## Additional setup
 
@@ -75,11 +104,11 @@ The essentials are already installed in your instance. However, we need to confi
 
 ### Configuring your zsh theme
 
-**IMPORTANT**: If you are using Windows, you can use [Windows Terminal](https://microsoft.com/en-us/p/windows-terminal/9n0dx20hk701).
-
 **IMPORTANT**: You also need to install the [recommended fonts](https://github.com/romkatv/powerlevel10k#meslo-nerd-font-patched-for-powerlevel10k) for the theme to display properly.
 
-If you enabled `UPGRADE_SHELL_EXPERIENCE`, [zsh](https://sourceforge.net/p/zsh/code/ci/master/tree/), [oh-my-zsh](https://ohmyz.sh/), and the [powerlevel10k zsh theme](https://github.com/romkatv/powerlevel10k) will be installed.
+**IMPORTANT**: If you are using Windows, you can use [Windows Terminal](https://microsoft.com/en-us/p/windows-terminal/9n0dx20hk701). You can check [my current settings for Windows Terminal](./windows/terminal/settings.md).
+
+If you enabled `UPGRADE_SHELL_EXPERIENCE`, [zsh](https://www.zsh.org/), [oh-my-zsh](https://ohmyz.sh/), and the [powerlevel10k zsh theme](https://github.com/romkatv/powerlevel10k) will be installed.
 
 On your first login via SSH, it will ask you to configure your theme. To run the wizard again, you can run:
 
