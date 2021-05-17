@@ -33,6 +33,77 @@ Here are my current settings.
                 "splitMode": "duplicate"
             },
             "keys": "alt+shift+d"
+        },
+        
+        {
+            "command": "unbound",
+            "keys": 
+            [
+                "alt+shift+-"
+            ]
+        },
+        {
+            "command": "unbound",
+            "keys": 
+            [
+                "alt+shift+plus"
+            ]
+        },
+        {
+            "command": "unbound",
+            "keys": 
+            [
+                "alt+down"
+            ]
+        },
+        {
+            "command": "unbound",
+            "keys": 
+            [
+                "alt+left"
+            ]
+        },
+        {
+            "command": "unbound",
+            "keys": 
+            [
+                "alt+right"
+            ]
+        },
+        {
+            "command": "unbound",
+            "keys": 
+            [
+                "alt+up"
+            ]
+        },
+        {
+            "command": "unbound",
+            "keys": 
+            [
+                "alt+shift+down"
+            ]
+        },
+        {
+            "command": "unbound",
+            "keys": 
+            [
+                "alt+shift+left"
+            ]
+        },
+        {
+            "command": "unbound",
+            "keys": 
+            [
+                "alt+shift+right"
+            ]
+        },
+        {
+            "command": "unbound",
+            "keys": 
+            [
+                "alt+shift+up"
+            ]
         }
     ],
     "copyFormatting": "none",
@@ -285,3 +356,5 @@ Here are my current settings.
     ]
 }
 ```
+
+To learn more about actions and keybindings, visit https://aka.ms/terminal-keybindings.
