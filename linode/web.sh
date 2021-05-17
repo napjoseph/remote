@@ -12,14 +12,15 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="LOCK_ROOT_ACCOUNT" label="Lock the root account?" oneof="yes,no" default="yes" />
 # <UDF name="UPGRADE_DEBIAN" label="Upgrade the system automatically?" oneof="yes,no" default="yes" />
 # <UDF name="UPGRADE_SHELL_EXPERIENCE" label="Upgrade shell experience? Uses zsh, oh-my-zsh, and powerlevel10k." oneof="yes,no" default="yes" />
-# <UDF name="INSTALL_KEYBASE" label="Install Keybase? See https://keybase.io/ for more details." oneof="yes,no" default="yes" />
-# <UDF name="INSTALL_GOLANG" label="Install the Go Programming Language? See https://golang.org/ for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_KEYBASE" label="Install Keybase? See https://keybase.io for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_GOLANG" label="Install the Go Programming Language? See https://golang.org for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_NVM" label="Install Node Version Manager? See https://github.com/nvm-sh/nvm for more details." oneof="yes,no" default="yes" />
-# <UDF name="INSTALL_DOCKER" label="Install docker? See https://www.docker.com/ for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_DOCKER" label="Install docker? See https://www.docker.com for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_HOMEBREW" label="Install homebrew? See https://brew.sh for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_PYENV" label="Install pyenv? See https://github.com/pyenv/pyenv for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_BYOBU" label="Install byobu? See https://byobu.org for more details." oneof="yes,no" default="yes" />
-# <UDF name="INSTALL_SPACEVIM" label="Install spacevim? See https://spacevim.org/ for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_SPACEVIM" label="Install spacevim? See https://spacevim.org for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_BAT" label="Install bat? See https://github.com/sharkdp/bat for more details." oneof="yes,no" default="yes" />
 # <UDF name="SYSTEM_TIMEZONE" label="Choose system timezone." default="Asia/Manila" example="Asia/Manila" />
 # <UDF name="SYSTEM_PUBLIC_KEY" label="If you want to copy a specific SSH key identity, put the PUBLIC_KEY here. Otherwise, leave this blank." example="ssh-ed25519 AAAA...zzzz name@email.com" />
 # <UDF name="SYSTEM_PRIVATE_KEY" label="If you want to copy a specific SSH key identity, put the PRIVATE_KEY here. Otherwise, leave this blank." example="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY-----" />
@@ -152,7 +153,7 @@ install_keybase() {
 
   wget https://prerelease.keybase.io/keybase_amd64.deb -O /tmp/keybase_amd64.deb
   ret=$?
-  apt -y install /tmp/keybase_amd64.deb
+  dpkg --force-confold -i /tmp/keybase_amd64.deb
   ret=$((ret+$?))
   rm /tmp/keybase_amd64.deb
   ret=$((ret+$?))
@@ -338,6 +339,20 @@ install_spacevim() {
   return $ret
 }
 
+install_bat() {
+  local ret=0
+
+  # Download the latest non-musl release for amd64 machines.
+  curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep -E 'browser_download_url' | grep amd64 | grep -v musl | cut -d '"' -f 4 | wget -qi - -O /tmp/bat_amd64.deb
+  ret=$((ret+$?))
+  dpkg --force-confold -i /tmp/bat_amd64.deb
+  ret=$((ret+$?))
+  rm /tmp/bat_amd64.deb
+  ret=$((ret+$?))
+ 
+  return $ret
+}
+
 update_skel_files() {
   local ret=0
   
@@ -462,6 +477,12 @@ log "config_ssh" \
   log "install_spacevim" \
     "installing spacevim: failed." \
     "installing spacevim: successful."
+}
+
+[ "$INSTALL_BAT" = "yes" ] && {
+  log "install_bat" \
+    "installing bat: failed." \
+    "installing bat: successful."
 }
 
 # Moving this at the bottom since it takes too long.
