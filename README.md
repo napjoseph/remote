@@ -12,6 +12,7 @@ Helps you create your own remote web development environment using [Linode](http
 - [x] [Docker](https://www.docker.com/)
 - [x] [byobu](https://byobu.org)
 - [x] [spacevim](https://spacevim.org)
+- [x] [bat](https://github.com/sharkdp/bat)
 - [x] [Homebrew](https://brew.sh)
 
 ## Pre-requisities
