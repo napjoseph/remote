@@ -19,6 +19,7 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="INSTALL_HOMEBREW" label="Install homebrew? See https://brew.sh for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_PYENV" label="Install pyenv? See https://github.com/pyenv/pyenv for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_BYOBU" label="Install byobu? See https://byobu.org for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_SPACEVIM" label="Install spacevim? See https://spacevim.org/ for more details." oneof="yes,no" default="yes" />
 # <UDF name="SYSTEM_TIMEZONE" label="Choose system timezone." default="Asia/Manila" example="Asia/Manila" />
 # <UDF name="SYSTEM_PUBLIC_KEY" label="If you want to copy a specific SSH key identity, put the PUBLIC_KEY here. Otherwise, leave this blank." example="ssh-ed25519 AAAA...zzzz name@email.com" />
 # <UDF name="SYSTEM_PRIVATE_KEY" label="If you want to copy a specific SSH key identity, put the PRIVATE_KEY here. Otherwise, leave this blank." example="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY-----" />
@@ -328,6 +329,15 @@ install_byobu() {
   return $ret
 }
 
+install_spacevim() {
+  local ret=0
+
+  runuser -u $USERNAME -- /bin/bash -c "$(curl -fsSL https://spacevim.org/install.sh)"
+  ret=$((ret+$?))
+ 
+  return $ret
+}
+
 update_skel_files() {
   local ret=0
   
@@ -446,6 +456,12 @@ log "config_ssh" \
   log "install_byobu" \
     "installing byobu: failed." \
     "installing byobu: successful."
+}
+
+[ "$INSTALL_SPACEVIM" = "yes" ] && {
+  log "install_spacevim" \
+    "installing spacevim: failed." \
+    "installing spacevim: successful."
 }
 
 # Moving this at the bottom since it takes too long.
