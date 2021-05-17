@@ -11,6 +11,7 @@ Helps you create your own remote web development environment using [Linode](http
 - [x] [pyenv](https://github.com/pyenv/pyenv)
 - [x] [Docker](https://www.docker.com/)
 - [x] [byobu](https://byobu.org)
+- [x] [spacevim](https://spacevim.org)
 - [x] [Homebrew](https://brew.sh)
 
 ## Pre-requisities
