@@ -4,7 +4,7 @@ Helps you create your own remote web development environment using [Linode](http
 
 ## Installs
 
-- [x] [zsh](https://www.zsh.org/), [oh-my-zsh](https://ohmyz.sh/), and [powerlevel10k](https://github.com/romkatv/powerlevel10k)
+- [x] [zsh](https://www.zsh.org/), [oh-my-zsh](https://ohmyz.sh/), [powerlevel10k](https://github.com/romkatv/powerlevel10k), [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions), and [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
 - [x] [Keybase](https://keybase.io)
 - [x] [Go](https://golang.org/)
 - [x] [Node Version Manager](https://github.com/nvm-sh/nvm)
@@ -13,6 +13,7 @@ Helps you create your own remote web development environment using [Linode](http
 - [x] [byobu](https://byobu.org)
 - [x] [spacevim](https://spacevim.org)
 - [x] [bat](https://github.com/sharkdp/bat)
+- [x] [direnv](https://github.com/direnv/direnv)
 - [x] [Homebrew](https://brew.sh)
 
 ## Pre-requisities
