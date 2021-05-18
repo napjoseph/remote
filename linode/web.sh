@@ -348,7 +348,7 @@ install_spacevim() {
   ret=$((ret+$?))
   
   # Manually build vimproc to prevent errors (it happens).
-  runuser -u $USERNAME -- make /home/$USERNAME/.SpaceVim/bundle/vimproc.vim/
+  runuser -u $USERNAME -- make -C /home/$USERNAME/.SpaceVim/bundle/vimproc.vim/
   ret=$((ret+$?))
  
   return $ret
