@@ -228,9 +228,14 @@ source $ZSH/oh-my-zsh.sh
     sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/g' /usr/share/oh-my-zsh/zshrc
   ret=$((ret+$?))
   
-  # Install oh-my-zsh autocomplete.
+  # Install zsh autocomplete plugin.
   git clone https://github.com/zsh-users/zsh-autosuggestions /usr/share/oh-my-zsh/custom/plugins/zsh-autosuggestions && \
     sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /usr/share/oh-my-zsh/zshrc
+  ret=$((ret+$?))
+  
+  # Install zsh syntax highlighting plugin.
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting /usr/share/oh-my-zsh/custom/plugins/zsh-syntax-highlighting && \
+    sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-syntax-highlighting)/g' /usr/share/oh-my-zsh/zshrc
   ret=$((ret+$?))
   
   # Copy this to the skeleton templates directory.
