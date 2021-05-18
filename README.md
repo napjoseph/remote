@@ -119,6 +119,12 @@ On your first login via SSH, it will ask you to configure your theme. To run the
 p10k configure
 ```
 
+### Fixing your SSH Private Key
+
+Due to StackScripts not yet having a multiple-line UDF, the line breaks for our private key was removed.
+
+Update the `.ssh/$HOSTNAME` with the correct version.
+
 ### Configure Keybase
 
 ```bash
