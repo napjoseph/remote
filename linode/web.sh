@@ -22,6 +22,7 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="INSTALL_SPACEVIM" label="Install spacevim? See https://spacevim.org for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_BAT" label="Install bat? See https://github.com/sharkdp/bat for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_DIRENV" label="Install direnv? See https://direnv.net/ for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_LAZYGIT" label="Install lazygit? Requires Go to be installed. See https://github.com/jesseduffield/lazygit for more details." oneof="yes,no" default="yes" />
 # <UDF name="SYSTEM_TIMEZONE" label="Choose system timezone." default="Asia/Manila" example="Asia/Manila" />
 # <UDF name="SYSTEM_PUBLIC_KEY" label="If you want to copy a specific SSH key identity, put the PUBLIC_KEY here. Otherwise, leave this blank." example="ssh-ed25519 AAAA...zzzz name@email.com" />
 # <UDF name="SYSTEM_PRIVATE_KEY" label="If you want to copy a specific SSH key identity, put the PRIVATE_KEY here. Otherwise, leave this blank." example="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY-----" />
@@ -170,8 +171,11 @@ install_golang() {
     rm /tmp/golang.tar.gz
   ret=$((ret+$?))
 
-  echo "export PATH=\$PATH:/usr/local/go/bin" >> /home/$USERNAME/.profile && \
-    echo "export GOPATH=/home/$USERNAME/.go" >> /home/$USERNAME/.profile
+  echo "
+# go
+export GOPATH=/home/$USERNAME/.go
+export PATH=\$PATH:/usr/local/go/bin:$GOPATH/bin
+" >> /home/$USERNAME/.profile
   ret=$((ret+$?))
   
   return $ret
@@ -405,6 +409,23 @@ eval \"\$(direnv hook bash)\"
   return $ret
 }
 
+install_lazygit() {
+  local ret=0
+
+  # Installs Go if not yet installed.
+  [ "$INSTALL_GOLANG" = "no" ] && {
+    log "install_golang" \
+      "installing golang: failed." \
+      "installing golang: successful."
+  }
+  ret=$((ret+$?))
+
+  go get github.com/jesseduffield/lazygit
+  ret=$((ret+$?))
+ 
+  return $ret
+}
+
 update_skel_files() {
   local ret=0
   
@@ -541,6 +562,12 @@ log "config_ssh" \
   log "install_direnv" \
     "installing direnv: failed." \
     "installing direnv: successful."
+}
+
+[ "$INSTALL_LAZYGIT" = "yes" ] && {
+  log "install_lazygit" \
+    "installing lazygit: failed." \
+    "installing lazygit: successful."
 }
 
 # Moving this at the bottom since it takes too long.
