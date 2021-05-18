@@ -325,13 +325,21 @@ install_byobu() {
     touch $BYOBU_DIR/.reuse-session
   ret=$((ret+$?))
   
+  # Fix byobu closes window when pressing q on F1/F9 screen.
+  grep new-window /usr/share/byobu/keybindings/f-keys.tmux \
+    | grep ' -k' \
+    | sed -e 's/ -k/ -ak/' \
+    >> $BYOBU_DIR/keybindings.tmux
+  
   # Set the default shell to use.
   local DEFAULT_SHELL=/bin/bash
   if [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ]; then
     DEFAULT_SHELL=$(which zsh)
   fi
-  echo "set -g default-shell $DEFAULT_SHELL" >> $BYOBU_DIR/.tmux.conf && \
-    echo "set -g default-command $DEFAULT_SHELL" >> $BYOBU_DIR/.tmux.conf
+  echo "
+set -g default-shell $DEFAULT_SHELL
+set -g default-command $DEFAULT_SHELL
+" >> $BYOBU_DIR/.tmux.conf
   ret=$((ret+$?))
   
   # Make sure the non-root user is the owner of the files.
