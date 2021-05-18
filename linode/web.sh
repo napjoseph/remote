@@ -170,7 +170,7 @@ install_golang() {
     rm /tmp/golang.tar.gz
   ret=$((ret+$?))
 
-  echo "export PATH=$PATH:/usr/local/go/bin" >> /home/$USERNAME/.profile && \
+  echo "export PATH=\$PATH:/usr/local/go/bin" >> /home/$USERNAME/.profile && \
     echo "export GOPATH=/home/$USERNAME/.go" >> /home/$USERNAME/.profile
   ret=$((ret+$?))
   
@@ -235,6 +235,15 @@ source $ZSH/oh-my-zsh.sh
     sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions zsh-syntax-highlighting)/g' /usr/share/oh-my-zsh/zshrc
   ret=$((ret+$?))
   
+  # Add a function to reload the zsh config.
+  echo '
+# Manually reloads the zsh configuration files.
+function reload() {
+  [ -s ~/.zshenv ] && \. ~/.zshenv
+  [ -s ~/.zprofile ] && \. ~/.zprofile
+  [ -s ~/.zshrc ] && \. ~/.zshrc
+}' >> /usr/share/oh-my-zsh/zshrc
+
   # Copy this to the skeleton templates directory.
   ln /usr/share/oh-my-zsh/zshrc /etc/skel/.zshrc
   ret=$((ret+$?))
