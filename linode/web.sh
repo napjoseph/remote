@@ -21,6 +21,7 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="INSTALL_BYOBU" label="Install byobu? See https://byobu.org for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_SPACEVIM" label="Install spacevim? See https://spacevim.org for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_BAT" label="Install bat? See https://github.com/sharkdp/bat for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_DIRENV" label="Install direnv? See https://direnv.net/ for more details." oneof="yes,no" default="yes" />
 # <UDF name="SYSTEM_TIMEZONE" label="Choose system timezone." default="Asia/Manila" example="Asia/Manila" />
 # <UDF name="SYSTEM_PUBLIC_KEY" label="If you want to copy a specific SSH key identity, put the PUBLIC_KEY here. Otherwise, leave this blank." example="ssh-ed25519 AAAA...zzzz name@email.com" />
 # <UDF name="SYSTEM_PRIVATE_KEY" label="If you want to copy a specific SSH key identity, put the PRIVATE_KEY here. Otherwise, leave this blank." example="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY-----" />
@@ -228,14 +229,10 @@ source $ZSH/oh-my-zsh.sh
     sed -i 's/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"powerlevel10k\/powerlevel10k\"/g' /usr/share/oh-my-zsh/zshrc
   ret=$((ret+$?))
   
-  # Install zsh autocomplete plugin.
+  # Install zsh plugins: autocomplete and syntax highlighting.
   git clone https://github.com/zsh-users/zsh-autosuggestions /usr/share/oh-my-zsh/custom/plugins/zsh-autosuggestions && \
-    sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions)/g' /usr/share/oh-my-zsh/zshrc
-  ret=$((ret+$?))
-  
-  # Install zsh syntax highlighting plugin.
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting /usr/share/oh-my-zsh/custom/plugins/zsh-syntax-highlighting && \
-    sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-syntax-highlighting)/g' /usr/share/oh-my-zsh/zshrc
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting /usr/share/oh-my-zsh/custom/plugins/zsh-syntax-highlighting && \
+    sed -i 's/plugins=(\(\w\+\))/plugins=(\1 zsh-autosuggestions zsh-syntax-highlighting)/g' /usr/share/oh-my-zsh/zshrc
   ret=$((ret+$?))
   
   # Copy this to the skeleton templates directory.
@@ -340,6 +337,10 @@ install_spacevim() {
 
   runuser -u $USERNAME -- /bin/bash -c "$(curl -fsSL https://spacevim.org/install.sh)"
   ret=$((ret+$?))
+  
+  # Manually build vimproc to prevent errors (it happens).
+  runuser -u $USERNAME -- make /home/$USERNAME/.SpaceVim/bundle/vimproc.vim/
+  ret=$((ret+$?))
  
   return $ret
 }
@@ -353,6 +354,35 @@ install_bat() {
   dpkg --force-confold -i /tmp/bat_amd64.deb
   ret=$((ret+$?))
   rm /tmp/bat_amd64.deb
+  ret=$((ret+$?))
+ 
+  return $ret
+}
+
+install_direnv() {
+  local ret=0
+
+  # Download the latest release for linux amd64 machines.
+  curl -s https://api.github.com/repos/direnv/direnv/releases/latest | grep -E 'browser_download_url' | grep linux-amd64 | cut -d '"' -f 4 | wget -qi - -O /usr/local/bin/direnv
+  ret=$((ret+$?))
+  chmod +x /usr/local/bin/direnv
+  ret=$((ret+$?))
+  
+  # Add hook.
+  if [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ]; then
+    echo "
+# direnv
+emulate zsh -c \"\$(direnv hook zsh)\"
+" >> /home/$USERNAME/.zshrc
+    echo "
+emulate zsh -c \"\$(direnv export zsh)\"
+" >> /home/$USERNAME/.zprofile
+  else
+    echo "
+# direnv
+eval \"\$(direnv hook bash)\"
+" >> /home/$USERNAME/.bashrc
+  fi
   ret=$((ret+$?))
  
   return $ret
@@ -488,6 +518,12 @@ log "config_ssh" \
   log "install_bat" \
     "installing bat: failed." \
     "installing bat: successful."
+}
+
+[ "$INSTALL_DIRENV" = "yes" ] && {
+  log "install_direnv" \
+    "installing direnv: failed." \
+    "installing direnv: successful."
 }
 
 # Moving this at the bottom since it takes too long.
