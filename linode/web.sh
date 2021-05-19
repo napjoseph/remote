@@ -116,7 +116,7 @@ config_ssh() {
     #  https://stackoverflow.com/a/24902046
     #  https://unix.stackexchange.com/a/90869
     apt update -y && \
-      apt install -y keychain
+      apt --fix-broken install -y keychain
     ret=$((ret+$?))
   fi
 
@@ -156,23 +156,24 @@ install_essentials() {
   local ret=0
   
   apt update -y && \
-    apt install -y build-essential procps curl file tree git
+    apt --fix-broken install -y build-essential procps curl file tree git
   ret=$((ret+$?))
   
   if [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ]; then
-    apt install -y zsh
+    apt --fix-broken install -y zsh
     ret=$((ret+$?))
   fi
   
   return $ret
 }
 
+# This is still a work in progress.
 install_latest_git() {
   local ret=0
   
   # Install the latest non-rc version of git.
   # From https://git-scm.com/book/en/v2/Getting-Started-Installing-Git.
-  apt install -y dh-autoreconf libcurl4-gnutls-dev libexpat1-dev gettext libz-dev libssl-dev asciidoc xmlto docbook2x install-info && \
+  apt --fix-broken install -y dh-autoreconf libcurl4-gnutls-dev libexpat1-dev gettext libz-dev libssl-dev asciidoc xmlto docbook2x install-info && \
     curl -s https://api.github.com/repos/git/git/tags | grep -E 'tarball_url' | grep -v 'rc' | head -1 | cut -d '"' -f 4 | wget -qi - -O /tmp/git.tar.gz && \
     mkdir -p /tmp/git && \
     tar -C /tmp/git -xzf /tmp/git.tar.gz && \
