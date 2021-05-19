@@ -226,7 +226,7 @@ install_golang() {
   echo "
 # go
 export GOPATH=/home/$USERNAME/.go
-export PATH=\$PATH:/usr/local/go/bin:$GOPATH/bin
+export PATH=\$PATH:/usr/local/go/bin:\$GOPATH/bin
 " >> /home/$USERNAME/.profile
   ret=$((ret+$?))
   
