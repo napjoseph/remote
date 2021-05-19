@@ -14,6 +14,7 @@ Helps you create your own remote web development environment using [Linode](http
 - [x] [spacevim](https://spacevim.org)
 - [x] [bat](https://github.com/sharkdp/bat)
 - [x] [direnv](https://github.com/direnv/direnv)
+- [x] [stow](https://www.gnu.org/software/stow)
 - [x] [Homebrew](https://brew.sh)
 
 ## Pre-requisities
