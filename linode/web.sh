@@ -156,11 +156,13 @@ install_essentials() {
   local ret=0
   
   apt update -y && \
-    apt --fix-broken install -y build-essential procps curl file tree git
+    apt --fix-broken install -y && \
+    apt install -y build-essential procps curl file tree git
   ret=$((ret+$?))
   
   if [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ]; then
-    apt --fix-broken install -y zsh
+    apt --fix-broken install -y && \
+      apt install -y zsh
     ret=$((ret+$?))
   fi
   
@@ -173,7 +175,10 @@ install_latest_git() {
   
   # Install the latest non-rc version of git.
   # From https://git-scm.com/book/en/v2/Getting-Started-Installing-Git.
-  apt --fix-broken install -y dh-autoreconf libcurl4-gnutls-dev libexpat1-dev gettext libz-dev libssl-dev asciidoc xmlto docbook2x install-info && \
+  
+  apt update -y && \
+    apt --fix-broken install -y && \
+    apt install -y dh-autoreconf libcurl4-gnutls-dev libexpat1-dev gettext libz-dev libssl-dev asciidoc xmlto docbook2x install-info && \
     curl -s https://api.github.com/repos/git/git/tags | grep -E 'tarball_url' | grep -v 'rc' | head -1 | cut -d '"' -f 4 | wget -qi - -O /tmp/git.tar.gz && \
     mkdir -p /tmp/git && \
     tar -C /tmp/git -xzf /tmp/git.tar.gz && \
@@ -355,7 +360,8 @@ install_byobu() {
   
   # Install from apt.
   apt update -y && \
-    apt-get -y install byobu
+    apt --fix-broken install -y && \
+    apt install -y byobu
 
   # Add byobu to the list of shells.
   which byobu | tee -a /etc/shells
@@ -473,7 +479,8 @@ install_stow() {
   
   # Install from apt.
   apt update -y && \
-    apt-get -y install stow
+    apt --fix-broken install -y && \
+    apt install -y stow
   ret=$((ret+$?))
 
   return $ret
