@@ -152,6 +152,41 @@ config_timezone() {
   timedatectl set-timezone $SYSTEM_TIMEZONE
 }
 
+install_essentials() {
+  local ret=0
+  
+  apt update -y && \
+    apt install -y build-essential procps curl file tree git
+  ret=$((ret+$?))
+  
+  if [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ]; then
+    apt install -y zsh
+    ret=$((ret+$?))
+  fi
+  
+  return $ret
+}
+
+install_latest_git() {
+  local ret=0
+  
+  # Install the latest non-rc version of git.
+  # From https://git-scm.com/book/en/v2/Getting-Started-Installing-Git.
+  apt install -y dh-autoreconf libcurl4-gnutls-dev libexpat1-dev gettext libz-dev libssl-dev asciidoc xmlto docbook2x install-info && \
+    curl -s https://api.github.com/repos/git/git/tags | grep -E 'tarball_url' | grep -v 'rc' | head -1 | cut -d '"' -f 4 | wget -qi - -O /tmp/git.tar.gz && \
+    mkdir -p /tmp/git && \
+    tar -C /tmp/git -xzf /tmp/git.tar.gz && \
+    TMP_GIT_DIR=$(ls -d /tmp/git/*/ | head -n 1) && \
+    GIT_SRC_DIR=${TMP_GIT_DIR%/} && \
+    make -C $GIT_SRC_DIR configure && \
+    $GIT_SRC_DIR/configure --prefix=/usr && \
+    make -C $GIT_SRC_DIR all doc info && \
+    make -C $GIT_SRC_DIR install install-doc install-html install-info
+  ret=$((ret+$?))
+  
+  return $ret
+}
+
 install_keybase() {
   local ret=0
 
@@ -202,7 +237,7 @@ install_nvm() {
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-' >> /home/$USERNAME/.profile
+' >> /home/$USERNAME/.zshenv
   ret=$((ret+$?))
 
   return $ret
@@ -403,7 +438,7 @@ emulate zsh -c \"\$(direnv hook zsh)\"
 " >> /home/$USERNAME/.zshrc
     echo "
 emulate zsh -c \"\$(direnv export zsh)\"
-" >> /home/$USERNAME/.zprofile
+" >> /home/$USERNAME/.zshenv
   else
     echo "
 # direnv
@@ -468,7 +503,7 @@ export EDITOR="$VISUAL"
     sed -i 's/DSHELL=\/bin\/bash/DSHELL=\/bin\/zsh/g' /etc/adduser.conf
   
     # Create a .zprofile file that loads the values from .profile.
-    echo "[[ -e ~/.profile ]] && emulate sh -c 'source ~/.profile'" >> /etc/skel/.zprofile
+    echo "[[ -e ~/.profile ]] && emulate sh -c 'source ~/.profile'" >> /etc/skel/.zshenv
     ret=$((ret+$?))
 
     # Create a .zlogin file that is sourced in login shells.
@@ -493,15 +528,10 @@ log "config_hostname" \
     "upgrading system: successful."
 }
 
-# Updates the packages on the system from the distribution repositories.
-log "apt update -y" \
-  "updating distribution repositories: failed." \
-  "updating distribution repositories: successful."
-
-# Installs the essential applications. Added zsh here since we will use that when creating a new user.
-log "apt install -y build-essential procps curl file git tree zsh" \
-  "installing applications: failed." \
-  "installing applications: successful."
+# Installs the essential applications.
+log "install_essentials" \
+  "installing essential applications: failed." \
+  "installing essential applications: successful."
 
 [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ] && {
   log "upgrade_shell_experience" \
