@@ -23,6 +23,7 @@ export DEBIAN_FRONTEND="noninteractive"
 # <UDF name="INSTALL_BAT" label="Install bat? See https://github.com/sharkdp/bat for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_DIRENV" label="Install direnv? See https://direnv.net/ for more details." oneof="yes,no" default="yes" />
 # <UDF name="INSTALL_LAZYGIT" label="Install lazygit? Requires Go to be installed. See https://github.com/jesseduffield/lazygit for more details." oneof="yes,no" default="yes" />
+# <UDF name="INSTALL_STOW" label="Install stow? See https://www.gnu.org/software/stow for more details." oneof="yes,no" default="yes" />
 # <UDF name="SYSTEM_TIMEZONE" label="Choose system timezone." default="Asia/Manila" example="Asia/Manila" />
 # <UDF name="SYSTEM_PUBLIC_KEY" label="If you want to copy a specific SSH key identity, put the PUBLIC_KEY here. Otherwise, leave this blank." example="ssh-ed25519 AAAA...zzzz name@email.com" />
 # <UDF name="SYSTEM_PRIVATE_KEY" label="If you want to copy a specific SSH key identity, put the PRIVATE_KEY here. Otherwise, leave this blank." example="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY-----" />
@@ -114,7 +115,8 @@ config_ssh() {
     # Install keychain for ssh-agent convenience:
     #  https://stackoverflow.com/a/24902046
     #  https://unix.stackexchange.com/a/90869
-    apt-get -y install keychain
+    apt update -y && \
+      apt install -y keychain
     ret=$((ret+$?))
   fi
 
@@ -314,6 +316,10 @@ fi
 
 install_byobu() {
   local ret=0
+  
+  # Install from apt.
+  apt update -y && \
+    apt-get -y install byobu
 
   # Add byobu to the list of shells.
   which byobu | tee -a /etc/shells
@@ -426,6 +432,17 @@ install_lazygit() {
   return $ret
 }
 
+install_stow() {
+  local ret=0
+  
+  # Install from apt.
+  apt update -y && \
+    apt-get -y install stow
+  ret=$((ret+$?))
+
+  return $ret
+}
+
 update_skel_files() {
   local ret=0
   
@@ -477,12 +494,12 @@ log "config_hostname" \
 }
 
 # Updates the packages on the system from the distribution repositories.
-log "apt-get update" \
+log "apt update -y" \
   "updating distribution repositories: failed." \
   "updating distribution repositories: successful."
 
-# Installs the essential applications.
-log "apt-get -y install build-essential procps curl file git tree zsh byobu" \
+# Installs the essential applications. Added zsh here since we will use that when creating a new user.
+log "apt install -y build-essential procps curl file git tree zsh" \
   "installing applications: failed." \
   "installing applications: successful."
 
@@ -568,6 +585,12 @@ log "config_ssh" \
   log "install_lazygit" \
     "installing lazygit: failed." \
     "installing lazygit: successful."
+}
+
+[ "$INSTALL_STOW" = "yes" ] && {
+  log "install_stow" \
+    "installing stow: failed." \
+    "installing stow: successful."
 }
 
 # Moving this at the bottom since it takes too long.
