@@ -116,8 +116,16 @@ config_ssh() {
     #  https://stackoverflow.com/a/24902046
     #  https://unix.stackexchange.com/a/90869
     apt update -y && \
-      apt --fix-broken install -y keychain
+      apt --fix-broken install -y && \
+      apt install -y keychain
     ret=$((ret+$?))
+    
+    # Create a .zlogin file that is sourced in login shells.
+    echo "
+# keychain
+eval \$(keychain --quiet --nogui --noask --clear --agents ssh --eval $HOSTNAME)
+source ~/.keychain/$HOSTNAME-sh
+" >> /home/$USERNAME/.profile
   fi
 
   eval sed $sedopts
@@ -368,7 +376,10 @@ install_byobu() {
   ret=$((ret+$?))
   
   # Enable byobu on login.
-  runuser -u $USERNAME -- /bin/bash -c byobu-enable
+  echo "
+# byobu
+_byobu_sourced=1 . /usr/bin/byobu-launch 2>/dev/null || true
+" >> /home/$USERNAME/.profile
   ret=$((ret+$?))
   
   # Fix the reuse session bug.
@@ -512,10 +523,6 @@ export EDITOR="$VISUAL"
   
     # Create a .zprofile file that loads the values from .profile.
     echo "[[ -e ~/.profile ]] && emulate sh -c 'source ~/.profile'" >> /etc/skel/.zshenv
-    ret=$((ret+$?))
-
-    # Create a .zlogin file that is sourced in login shells.
-    echo "eval \$(keychain --quiet --nogui --noask --clear --agents ssh --eval $HOSTNAME)" >> /etc/skel/.zlogin
     ret=$((ret+$?))
   fi
   
