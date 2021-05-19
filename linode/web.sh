@@ -169,7 +169,8 @@ install_essentials() {
   ret=$((ret+$?))
   
   if [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ]; then
-    apt --fix-broken install -y && \
+    apt update -y && \
+      apt --fix-broken install -y && \
       apt install -y zsh
     ret=$((ret+$?))
   fi
