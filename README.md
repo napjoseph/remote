@@ -148,12 +148,12 @@ keybase pgp export --secret | gpg --allow-secret-key-import --import
 gpg --list-secret-keys --keyid-format LONG
 # /Users/pstadler/.gnupg/secring.gpg
 # ----------------------------------
-# sec   4096R/E870EE00 2016-04-06 [expires: 2032-04-02]
-# uid                  Patrick Stadler <patrick.stadler@gmail.com>
-# ssb   4096R/F9E3E72E 2016-04-06
+# pub   2048R/DEADBEEF 2012-08-16
+# uid                  Name (Comment) <email@host.tld>
+# sub   2048R/86D2FAC6 2012-08-16
 ```
 
-Notice the hash `E870EE00`. We will use this in the next section.
+Notice the hash `DEADBEEF`. We will use this in the next section.
 
 ### Configure Git
 
@@ -163,6 +163,6 @@ git config --global user.name "Your Name"
 git config --global user.email "your_name@example.com"
 
 # sign all commits using your GPG key
-git config --global user.signingkey E870EE00
+git config --global user.signingkey DEADBEEF
 git config --global commit.gpgsign true
 ```
