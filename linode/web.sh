@@ -415,6 +415,12 @@ set -g default-command $DEFAULT_SHELL
 
 install_spacevim() {
   local ret=0
+  
+  # Install vim-gtk3 for debian to fix blank guide buffer issue.
+  apt update -y && \
+    apt --fix-broken install -y && \
+    apt install -y vim-gtk3
+  ret=$((ret+$?))
 
   runuser -u $USERNAME -- /bin/bash -c "$(curl -fsSL https://spacevim.org/install.sh)"
   ret=$((ret+$?))
