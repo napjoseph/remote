@@ -419,7 +419,7 @@ install_spacevim() {
   # Install vim-gtk3 for debian to fix blank guide buffer issue.
   apt update -y && \
     apt --fix-broken install -y && \
-    apt install -y vim-gtk3
+    apt install -y neovim vim-gtk3
   ret=$((ret+$?))
 
   runuser -u $USERNAME -- /bin/bash -c "$(curl -fsSL https://spacevim.org/install.sh)"
