@@ -120,12 +120,25 @@ config_ssh() {
       apt install -y keychain
     ret=$((ret+$?))
     
-    # Create a .zlogin file that is sourced in login shells.
+    # Create a login file that is sourced in login shells.
     echo "
 # keychain
-eval \$(keychain --quiet --nogui --noask --clear --agents ssh --eval $HOSTNAME)
+eval \$(keychain --nogui --noask --clear --agents ssh --eval ~/.ssh/$HOSTNAME)
+# or if you also want to attach the gpg key:
+# eval \$(keychain --nogui --noask --clear --agents ssh,gpg --eval ~/.ssh/$HOSTNAME \$YOUR_GPG_KEY)
 source ~/.keychain/$HOSTNAME-sh
 " >> /home/$USERNAME/.profile
+
+    # Create a logout file that is sourced during logout.
+    local LOGOUT_FILE=/home/$USERNAME/.bash_logout
+    if [ "$UPGRADE_SHELL_EXPERIENCE" = "yes" ]; then
+      LOGOUT_FILE=/home/$USERNAME/.zlogout
+    fi
+    echo "
+# keychain
+# flush the keys on logout
+keychain --clear
+" >> $LOGOUT_FILE
   fi
 
   eval sed $sedopts
